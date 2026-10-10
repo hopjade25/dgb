@@ -169,5 +169,157 @@
    "beat": 124,
    "len": 32
   }
+ },
+ {
+  "id": "G",
+  "title": "G (제목 미정)",
+  "artist": "MIDI",
+  "bpm": "213",
+  "mid": "G",
+  "folder": "ORIGINAL",
+  "music": "data/music/G.json",
+  "charts": {
+   "BASIC": "charts/G-BASIC.dgb",
+   "MEDIUM": "charts/G-MEDIUM.dgb",
+   "HARD": "charts/G-HARD.dgb",
+   "SPECIAL": "charts/G-SPECIAL.dgb"
+  },
+  "preview": {
+   "beat": 280,
+   "len": 32
+  }
+ },
+ {
+  "id": "H",
+  "title": "H (제목 미정)",
+  "artist": "MIDI",
+  "bpm": "117-234",
+  "mid": "H",
+  "folder": "ORIGINAL",
+  "music": "data/music/H.json",
+  "charts": {
+   "BASIC": "charts/H-BASIC.dgb",
+   "MEDIUM": "charts/H-MEDIUM.dgb",
+   "HARD": "charts/H-HARD.dgb",
+   "SPECIAL": "charts/H-SPECIAL.dgb"
+  },
+  "preview": {
+   "beat": 248,
+   "len": 32
+  }
+ },
+ {
+  "id": "I",
+  "title": "I (제목 미정)",
+  "artist": "MIDI",
+  "bpm": "70-225",
+  "mid": "I",
+  "folder": "ORIGINAL",
+  "music": "data/music/I.json",
+  "charts": {
+   "BASIC": "charts/I-BASIC.dgb",
+   "MEDIUM": "charts/I-MEDIUM.dgb",
+   "HARD": "charts/I-HARD.dgb",
+   "SPECIAL": "charts/I-SPECIAL.dgb"
+  },
+  "preview": {
+   "beat": 292,
+   "len": 32
+  }
+ },
+ {
+  "id": "J",
+  "title": "J (제목 미정)",
+  "artist": "MIDI",
+  "bpm": "180",
+  "mid": "J",
+  "folder": "ORIGINAL",
+  "music": "data/music/J.json",
+  "charts": {
+   "BASIC": "charts/J-BASIC.dgb",
+   "MEDIUM": "charts/J-MEDIUM.dgb",
+   "HARD": "charts/J-HARD.dgb",
+   "SPECIAL": "charts/J-SPECIAL.dgb"
+  },
+  "preview": {
+   "beat": 220,
+   "len": 32
+  }
+ },
+ {
+  "id": "K",
+  "title": "돈파뮤",
+  "artist": "MIDI",
+  "bpm": "63.6-200",
+  "mid": "K",
+  "folder": "ORIGINAL",
+  "music": "data/music/K.json",
+  "charts": {
+   "BASIC": "charts/K-BASIC.dgb",
+   "MEDIUM": "charts/K-MEDIUM.dgb",
+   "HARD": "charts/K-HARD.dgb",
+   "SPECIAL": "charts/K-SPECIAL.dgb"
+  },
+  "preview": {
+   "beat": 252,
+   "len": 32
+  }
+ },
+ {
+  "id": "L",
+  "title": "에버라",
+  "artist": "MIDI",
+  "bpm": "230",
+  "mid": "L",
+  "folder": "ORIGINAL",
+  "music": "data/music/L.json",
+  "charts": {
+   "BASIC": "charts/L-BASIC.dgb",
+   "MEDIUM": "charts/L-MEDIUM.dgb",
+   "HARD": "charts/L-HARD.dgb",
+   "SPECIAL": "charts/L-SPECIAL.dgb"
+  },
+  "preview": {
+   "beat": 228,
+   "len": 32
+  }
+ },
+ {
+  "id": "M",
+  "title": "카무이",
+  "artist": "MIDI",
+  "bpm": "210",
+  "mid": "M",
+  "folder": "ORIGINAL",
+  "music": "data/music/M.json",
+  "charts": {
+   "BASIC": "charts/M-BASIC.dgb",
+   "MEDIUM": "charts/M-MEDIUM.dgb",
+   "HARD": "charts/M-HARD.dgb",
+   "SPECIAL": "charts/M-SPECIAL.dgb"
+  },
+  "preview": {
+   "beat": 260,
+   "len": 32
+  }
+ },
+ {
+  "id": "N",
+  "title": "라크리마",
+  "artist": "MIDI",
+  "bpm": "236",
+  "mid": "N",
+  "folder": "ORIGINAL",
+  "music": "data/music/N.json",
+  "charts": {
+   "BASIC": "charts/N-BASIC.dgb",
+   "MEDIUM": "charts/N-MEDIUM.dgb",
+   "HARD": "charts/N-HARD.dgb",
+   "SPECIAL": "charts/N-SPECIAL.dgb"
+  },
+  "preview": {
+   "beat": 232,
+   "len": 32
+  }
  }
 ]
