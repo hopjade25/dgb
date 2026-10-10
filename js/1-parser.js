@@ -35,15 +35,21 @@ function parseChart(text){
  function bpmAt(b){let v=meta.BPM;for(const c of bpmCh)if(c.beat<=b+1e-9)v=c.bpm;return v;}
  function spdAt(b){let m=1;for(const s of spdCh)if(s.beat<=b+1e-9)m=s.m;return m;}
  const fixed=String(meta.PATH||'').toUpperCase()==='FIXED'||(meta.PATH==null&&meta._seedGiven);seed=fixed?((meta.SEED>>>0)||1):((Math.random()*4294967296)>>>0);meta.pathMode=fixed?'FIXED':'RANDOM';
- const notes=[],lastIn={},openLong={};
+ const notes=[],lastIn={},openLong={},laneUsed=new Map();
  for(const e of ev){if(!e.tok)continue;const tk=TOK[e.tok],g=CH_TARGET[e.ch],time=beatToTime(e.beat);
   if(tk.end){const L=openLong[e.ch];if(L){L.end=time;L.endTol=15/bpmAt(e.beat);delete openLong[e.ch];}else warn.push(`${e.li+1}행: 대응하는 L 없는 E`);continue;}
   let fall=meta.FALL*spdAt(e.beat),u0;const prev=lastIn[e.ch];
   if(tk.chain&&prev&&prev.long)warn.push(`${e.li+1}행: 롱 뒤에는 체인을 이을 수 없음(롱은 체인 끝에만)`);
   if(tk.chain&&prev&&!prev.long&&!prev.flick){u0=prev.u0;fall=prev.fall;}else u0=undefined;
   if(u0===undefined&&g.type==='G')fall=fall*(BTN_Y-SPAWN_Y)/(LINE_Y-SPAWN_Y); // 초록 세로 속도 = 빨강(어지럼 분석 #3)
-  const n=makeNote(time,g,u0,fall,tk,Math.floor(e.beat/8));
-  if(tk.chain&&prev&&!prev.long&&!prev.flick)prev.next=n;
+  // 빨강 착지 레인 = 매 플레이 무작위(차트 레인 무시, 사용자 규칙). 체인 이음은 앞 노트와 같은 레인, 같은 시각 노트끼리는 서로 다른 레인
+  let gg=g;if(g.type==='R'){const tkey=time.toFixed(4),used=laneUsed.get(tkey)||new Set();let k;
+   if(tk.chain&&prev&&!prev.long&&!prev.flick&&prev.lane!=null&&!used.has(prev.lane))k=prev.lane;
+   else{const free=[0,1,2,3,4,5].filter(q=>!used.has(q));k=free.length?free[Math.floor(rnd()*free.length)]:Math.floor(rnd()*6);
+    if(tk.chain&&prev&&prev.lane!=null&&k!==prev.lane){u0=undefined;fall=meta.FALL*spdAt(e.beat);}}
+   used.add(k);laneUsed.set(tkey,used);gg=Object.assign({},g,{k});}
+  const n=makeNote(time,gg,u0,fall,tk,Math.floor(e.beat/8));if(g.type==='R')n.lane=gg.k;
+  if(tk.chain&&prev&&!prev.long&&!prev.flick&&(n.type!=='R'||n.lane===prev.lane))prev.next=n; // 레인이 갈리면 체인 끊음
   lastIn[e.ch]=n;if(tk.long)openLong[e.ch]=n;}
  // 트릴: 시간차로 교대하는 빨강 체인 2개 → 서로 교차하지 않는 경로(왼쪽 레인 체인은 왼쪽에서, 오른쪽은 오른쪽에서, 반사 없음)
  //  근거: atwiki 용어집 'トリル'(時間差で来る2本のチェイン), Tips '2本のチェイン(トリル)が判定ライン直前でクロスしなくなった'
@@ -66,16 +72,18 @@ function parseChart(text){
    any=true;for(const n of g){for(const q of chainOf(n))un(q,g[0]);n.chordPar=1;}}
   if(any){const comp=new Map();for(const n of notes){if(!n.chordPar)continue;const r=fd(n);if(!comp.has(r))comp.set(r,new Set());}
    for(const n of notes){const r=fd(n);if(comp.has(r))comp.get(r).add(n);}
-   for(const set of comp.values()){const g=[...set],ty=g[0].type;if(g.some(n=>n.type!==ty))continue;const X0=ty==='R'?XMIN:0,X1=ty==='R'?XMAX:W; // 빨강 동시치기는 반사 없음(반사 시점이 달라지면 평행이 깨짐) // 초록은 벽 통과 → 출발 x 0..W
+   let runVx=null,runT=-1e9; // 연속 동시치기(0.6초 이내)는 같은 방향 유지 — 매번 무작위 방향이면 쌍끼리 지그재그로 엇갈려 보임
+   const comps=[...comp.values()].map(s=>[...s]).sort((a,b)=>Math.min(...a.map(n=>n.time))-Math.min(...b.map(n=>n.time)));
+   for(const g of comps){const ty=g[0].type,gt=Math.min(...g.map(n=>n.time));if(g.some(n=>n.type!==ty))continue;const X0=ty==='R'?XMIN:0,X1=ty==='R'?XMAX:W; // 빨강 동시치기는 반사 없음(반사 시점이 달라지면 평행이 깨짐) // 초록은 벽 통과 → 출발 x 0..W
     let lo=-1e9,hi=1e9;for(const n of g){lo=Math.max(lo,(n.xh-X1)/n.fall);hi=Math.min(hi,(n.xh-X0)/n.fall);}if(lo>hi)continue;
     let vx;
     if(ty==='R'){ // 빨강 평행: 평균(→수직)이 아니라 MUSE 출발 후보에서 공유 속도를 고름 — 모든 멤버가 반사 ≤1회로 정확히 자기 목표에 도착
      const ok=v=>g.every(n=>{const u=n.xh-v*n.fall;return u>=XMIN-1e-6&&u<=XMAX+1e-6;});
      const h=g[0],C=museCands().map(c=>(h.xh-c.u)/h.fall).filter(ok),sl=C.filter(v=>Math.abs(v)*h.fall>SPAN/16);
-     const P=sl.length?sl:C;
-     if(P.length)vx=P[Math.floor(rnd()*P.length)];else vx=(rnd()<.5?lo:hi)*.85+(lo+hi)/2*.15;}  // 후보 없으면 허용 범위 끝쪽(기울게)
+     const P=sl.length?sl:C,cont=ty==='R'&&runVx!==null&&gt-runT<.6;
+     if(cont&&ok(runVx))vx=runVx;else if(cont&&P.length)vx=P.reduce((a,v)=>Math.abs(v-runVx)<Math.abs(a-runVx)?v:a);else if(P.length)vx=P[Math.floor(rnd()*P.length)];else vx=(rnd()<.5?lo:hi)*.85+(lo+hi)/2*.15;}  // 후보 없으면 허용 범위 끝쪽(기울게)
     else{vx=g.reduce((s,n)=>s+n.vx,0)/g.length;vx=Math.max(lo,Math.min(hi,vx));}
-    for(const q of g){q.vx=vx;q.u0=q.xh-vx*q.fall;q.par=1;}}}}
+    for(const q of g){q.vx=vx;q.u0=q.xh-vx*q.fall;q.par=1;}if(ty==='R'){runVx=vx;runT=Math.max(...g.map(n=>n.time));}}}}
  for(const k in openLong){openLong[k].long=false;warn.push(`${k}: 닫히지 않은 롱`);}
  function makeNote(time,g,u0,fall,tk,phrase){
   const green=g.type==='G',xh=green?BTNS[g.side].tx:RED_XS[g.k],ty=green?BTN_Y:LINE_Y;
