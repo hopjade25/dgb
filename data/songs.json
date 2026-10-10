@@ -58,7 +58,7 @@
  },
  {
   "id": "C",
-  "title": "C",
+  "title": "pupa",
   "artist": "MIDI",
   "bpm": "202",
   "mid": "C",
@@ -77,7 +77,7 @@
  },
  {
   "id": "D",
-  "title": "D",
+  "title": "legend",
   "artist": "MIDI",
   "bpm": "205-206",
   "mid": "D",
@@ -96,7 +96,7 @@
  },
  {
   "id": "E",
-  "title": "E",
+  "title": "garakuta",
   "artist": "MIDI",
   "bpm": "256",
   "mid": "E",
@@ -115,7 +115,7 @@
  },
  {
   "id": "F",
-  "title": "F",
+  "title": "sudden",
   "artist": "MIDI",
   "bpm": "275",
   "mid": "F",

@@ -26,7 +26,7 @@ function draw(){const T=performance.now();ctx.setTransform(scale*dpr,0,0,scale*d
  txt(String(big),W/2,H*.40,'bold 72px sans-serif','rgba(255,90,170,.09)');txt(opt.disp==='SCORE'?'YOUR SCORE':'COMBO',W/2,H*.40-48,'bold 11px sans-serif','rgba(255,90,170,.22)');
  ctx.fillStyle='rgba(120,220,255,.55)';ctx.fillRect(0,0,2,H);ctx.fillRect(W-2,0,2,H);
  const pc=Math.max(0,1-(T-press.C)/150);
- const BD=DS/2;ctx.fillStyle=`rgba(255,60,80,${.07+.22*pc})`;ctx.fillRect(0,LINE_Y-BD,W,DS);
+ const BD=BR;ctx.fillStyle=`rgba(255,60,80,${.07+.22*pc})`;ctx.fillRect(0,LINE_Y-BD,W,BAND); // 밴드·버튼은 오브젝트 크기 옵션과 무관(고정 56)
  ctx.strokeStyle='rgba(255,150,180,.95)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,LINE_Y-BD);ctx.lineTo(W,LINE_Y-BD);ctx.moveTo(0,LINE_Y+BD);ctx.lineTo(W,LINE_Y+BD);ctx.stroke();
  ctx.strokeStyle=`rgba(255,${120+120*lineFlash},${200+55*lineFlash},.9)`;ctx.lineWidth=2+1.5*lineFlash;ctx.beginPath();ctx.moveTo(0,LINE_Y);ctx.lineTo(W,LINE_Y);ctx.stroke();lineFlash*=.85;
  for(const side of ['L','M','R']){const cx=BTNS[side].x,a0=0,a1=Math.PI*2;const pb=Math.max(0,1-(T-press[side])/150);

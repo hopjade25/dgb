@@ -2,7 +2,7 @@
 // ============ 메뉴 (VOLZZA 2 흐름: TITLE → MUSIC SELECT ⇄ OPTION → PLAY → RESULT → MUSIC SELECT) ============
 // 메뉴 좌표는 640 설계 기준 (MOFF로 세로 중앙)
 // 화면 전환: 좌우 슬라이드(ease-out 320ms). dir=1 → 새 화면이 오른쪽에서 들어옴
-let trans=null,pressFx=null,menuDrag=null;
+let trans=null,pressFx=null,menuDrag=null,menuGuard=0;
 function go(to,dir){if(scene===to)return;trans={from:scene,dir:dir||1,t:performance.now()};scene=to;menuDrag=null;}
 const SEG_H=48;
 function segRow(r,y,items,cur,set,x0,w0){x0=x0||20;w0=w0||320;const n=items.length,gw=w0/n;items.forEach((lab,i)=>r.push({x:x0+i*gw+2,y,w:gw-4,h:SEG_H,lab,on:cur===i,act:()=>set(i)}));}
@@ -12,7 +12,7 @@ function rects(){const r=[];
  if(scene==='select'){
   FOLDERS.forEach((f,i)=>r.push({x:8+i*116,y:54,w:112,h:44,act:()=>{opt.folder=i;opt.sel=0;}}));
   r.push({x:240,y:54,w:112,h:44,act:()=>{opt.sort=(opt.sort+1)%3;}});
-  {const V=visList();V.L.forEach((s,j)=>{const i=V.off+j;r.push({x:8,y:106+j*62,w:344,h:56,act:()=>{if(opt.sel===i&&playableDiff(s,opt.diff))start();else{opt.sel=i;if(!playableDiff(s,opt.diff))opt.diff=songLevels(s).findIndex(v=>v!=null);}}});});}
+  {const V=visList();V.L.forEach((s,j)=>{const i=V.off+j;r.push({x:8,y:106+j*62,w:344,h:56,act:()=>{opt.sel=i;if(!playableDiff(s,opt.diff))opt.diff=songLevels(s).findIndex(v=>v!=null);}});});} // 곡 탭 = 선택만(시작은 START 버튼으로만)
   DIFFS.forEach((d,i)=>r.push({x:8+i*87,y:428,w:83,h:56,act:()=>{const s=curSong();if(s&&playableDiff(s,i))opt.diff=i;}}));
   r.push({x:8,y:496,w:108,h:52,act:()=>{go('option');}});
   r.push({x:124,y:496,w:108,h:52,act:()=>{try{fileIn.click();}catch(e){}}});
@@ -37,7 +37,7 @@ function rects(){const r=[];
   r.push({x:20,y:556,w:320,h:52,act:()=>{go('select',-1);},main:1});}
  if(scene==='result')r.push({x:30,y:560,w:300,h:52,act:()=>{go('select');},main:1});
  return r;}
-function menuTap(x,y){if(trans)return;if(scene==='title'){go('select');return;}
+function menuTap(x,y){if(trans||performance.now()<menuGuard)return;if(scene==='title'){go('select');return;}
  for(const b of rects()){if(b.act&&x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h){pressFx={x:b.x,y:b.y,w:b.w,h:b.h,t:performance.now()};b.act(x,y);if(b.drag)menuDrag=b;return;}}}
 function menuMove(x){if(menuDrag&&scene==='option')menuDrag.drag(x);}
 function menuUp(){if(menuDrag){const d=menuDrag;menuDrag=null;if(d.end)d.end();}}
@@ -47,5 +47,5 @@ function menuKey(k){if(scene==='title'){if(k==='ok')go('select');return;}
  if(scene==='select'){const L=folderSongs();
   if(k==='up')opt.sel=(opt.sel+L.length-1)%L.length;if(k==='down')opt.sel=(opt.sel+1)%L.length;
   if(k==='left'||k==='right'){const s=curSong();for(let i=1;i<=4;i++){const d=(opt.diff+(k==='right'?i:4-i))%4;if(s&&playableDiff(s,d)){opt.diff=d;break;}}}
-  if(k==='ok')start();if(k==='back')go('title',-1);}}
+  if(k==='back')go('title',-1);}} // Enter로 시작하지 않음(START 버튼만)
 

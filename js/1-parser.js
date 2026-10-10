@@ -66,9 +66,15 @@ function parseChart(text){
    any=true;for(const n of g){for(const q of chainOf(n))un(q,g[0]);n.chordPar=1;}}
   if(any){const comp=new Map();for(const n of notes){if(!n.chordPar)continue;const r=fd(n);if(!comp.has(r))comp.set(r,new Set());}
    for(const n of notes){const r=fd(n);if(comp.has(r))comp.get(r).add(n);}
-   for(const set of comp.values()){const g=[...set],ty=g[0].type;if(g.some(n=>n.type!==ty))continue;const X0=ty==='R'?XMIN:0,X1=ty==='R'?XMAX:W; // 초록은 벽 통과 → 출발 x 0..W
+   for(const set of comp.values()){const g=[...set],ty=g[0].type;if(g.some(n=>n.type!==ty))continue;const X0=ty==='R'?XMIN:0,X1=ty==='R'?XMAX:W; // 빨강 동시치기는 반사 없음(반사 시점이 달라지면 평행이 깨짐) // 초록은 벽 통과 → 출발 x 0..W
     let lo=-1e9,hi=1e9;for(const n of g){lo=Math.max(lo,(n.xh-X1)/n.fall);hi=Math.min(hi,(n.xh-X0)/n.fall);}if(lo>hi)continue;
-    let vx=g.reduce((s,n)=>s+n.vx,0)/g.length;if(Math.abs(vx)>VX_MAX)vx=Math.sign(vx)*VX_MAX;vx=Math.max(lo,Math.min(hi,vx));
+    let vx;
+    if(ty==='R'){ // 빨강 평행: 평균(→수직)이 아니라 MUSE 출발 후보에서 공유 속도를 고름 — 모든 멤버가 반사 ≤1회로 정확히 자기 목표에 도착
+     const ok=v=>g.every(n=>{const u=n.xh-v*n.fall;return u>=XMIN-1e-6&&u<=XMAX+1e-6;});
+     const h=g[0],C=museCands().map(c=>(h.xh-c.u)/h.fall).filter(ok),sl=C.filter(v=>Math.abs(v)*h.fall>SPAN/16);
+     const P=sl.length?sl:C;
+     if(P.length)vx=P[Math.floor(rnd()*P.length)];else vx=(rnd()<.5?lo:hi)*.85+(lo+hi)/2*.15;}  // 후보 없으면 허용 범위 끝쪽(기울게)
+    else{vx=g.reduce((s,n)=>s+n.vx,0)/g.length;vx=Math.max(lo,Math.min(hi,vx));}
     for(const q of g){q.vx=vx;q.u0=q.xh-vx*q.fall;q.par=1;}}}}
  for(const k in openLong){openLong[k].long=false;warn.push(`${k}: 닫히지 않은 롱`);}
  function makeNote(time,g,u0,fall,tk,phrase){
@@ -91,20 +97,21 @@ function parseChart(text){
  const mEnd=music.length?music[music.length-1].t+1.5:0;
  return {meta,notes,warn,endTime:Math.max(last+1.5,mEnd),music,beatToTime,bpmCh,spdCh};
 }
-// 경로 규칙(어지럼 분석 반영, docs/reflec-analysis.md §23):
-//  초록 = 고정 출발점(원작 TOP처럼) / 빨강 = 목표 ±1레인 안에서 출발, 가로 속도 ≤170px/s(≈19°),
-//  2마디 프레이즈마다 방향(왼쪽·직하·오른쪽) 하나를 공유, 반사는 13%(체인 공유 포함 실측 ~15–20%) · 상단 절반에서만 · 판정 0.5초 전까지
-// 모든 초록(L/M/R): 중앙 한 점(x=W/2, y=SPAWN_Y)에서 출발해 버튼 중심까지 직선
-const GREEN_SPAWN={L:W/2,M:W/2,R:W/2},VX_MAX=170,BOUNCE_P=.13;
-const phraseDir=p=>{let h=Math.imul(p+7,2654435761)>>>0;h^=h>>>13;return (h%3)-1;};
+// 경로 규칙 — REFLET MUSE 0.10.3 실행 파일(CObjPositionCalculator) 분석 기반 (docs/reflec-analysis.md §25):
+//  MUSE 필드: 벽 x=19..699(폭 680), 판정선 y=165(상대)/1050(자기). 라인 오브젝트 x = 19+(p+1)·680/8 (p=0..6, 7칸 격자),
+//  오브젝트는 상대 판정선(화면 위)에서 출발해 자기 판정선의 자기 칸으로 직진(옆벽 반사 가능).
+//  dgb 적용: 출발점 = 위쪽 7칸 격자(XMIN+SPAN·(k+1)/8) 중 무작위 — 목표와 무관(각도 상한·±1레인 규칙 없음).
+//  반사: 출발점을 가까운 벽 기준으로 거울상(펼친 좌표) → 정확히 1회 반사. 확률 MUSE_BOUNCE(미복원 값, dgb 추정).
+// 모든 초록(L/M/R): 중앙 한 점(x=W/2, y=SPAWN_Y)에서 출발해 버튼 중심까지 직선(사용자 규칙)
+const GREEN_SPAWN={L:W/2,M:W/2,R:W/2},VX_MAX=1e9,MUSE_BOUNCE=.35;
+const MUSE_XS=[0,1,2,3,4,5,6].map(k=>XMIN+SPAN*(k+1)/8);
+// 출발점 후보(펼친 좌표 u0): 직진 7개 + 왼벽 거울 7개 + 오른벽 거울 7개 — 모두 반사 ≤1회
+function museCands(){const c=[];for(const x of MUSE_XS){c.push({u:x,b:0});c.push({u:2*XMIN-x,b:1});c.push({u:2*XMAX-x,b:1});}return c;}
 function randU0(side,xh,fall,phrase){
  if(side)return GREEN_SPAWN[side];
- const cap=Math.min(60,VX_MAX*fall),d=phraseDir(phrase||0);
- if(rnd()<BOUNCE_P){const wallL=xh<W/2,dist=wallL?xh-XMIN:XMAX-xh;   // 가까운 벽으로 1회 반사
-  const room=Math.min(dist,VX_MAX*fall-dist,(fall-.5)/fall*(dist+60)); // 상단 절반 접힘·마지막 0.5초 반사 금지·속도 상한
-  if(room>8){const dd=8+rnd()*(room-8),s=dd/(dist+dd);if(s<.5&&(1-s)*fall>=.5)return wallL?XMIN-dd:XMAX+dd;}}
- let xs=xh-d*(cap*.5+rnd()*cap*.5);if(d===0)xs=xh+(rnd()*2-1)*cap*.25;
- return Math.max(XMIN,Math.min(XMAX,xs));}
+ const x=MUSE_XS[Math.floor(rnd()*7)];
+ if(rnd()<MUSE_BOUNCE)return x<W/2?2*XMIN-x:2*XMAX-x; // 출발점과 가까운 벽으로 1회 반사
+ return x;}
 
 // ============ 랜덤 차트 생성기 → 텍스트(파서로 읽음) ============
 // 패턴 어휘(용어집): 체인(縦連/연타) · 트릴 · 계단 · 데님(TOP체인+레인체인 교대) · 즈레 · 롱잡(軸) · 동시치기 · 소프란 · 플릭

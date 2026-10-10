@@ -47,7 +47,9 @@ function resumeGame(){if(!paused||paused.cd)return;paused.cd=performance.now();}
 function unfreeze(){const f=paused.t;paused=null;initAudio(); // 시계 재기준: 멈춘 시각 f에서 이어서
  perf0=performance.now()/1000-(f-AT);t0=ac?ac.currentTime-(f-AT):0;audioOK=false;lastAcT=-1;acOff=0;
  schedI=0;while(schedI<song.music.length&&song.music[schedI].t<f-.01)schedI++;}
-function quitPause(toMenu){paused=null;initAudio();if(toMenu)scene='select';else start();}
+// 메뉴로: 같은 터치가 pointerdown·touchstart로 두 번 들어오는데, 장면이 바뀌면 디바운스 키(zone)가 달라져 두 번째가 선곡 화면 탭으로 새어 곡 선택/재시작이 됐음
+// → 메뉴 탭 가드 + 슬라이드 전환(전환 중엔 메뉴 탭 무시), 눌린 포인터 정리
+function quitPause(toMenu){paused=null;ptrs.clear();pendF.clear();menuGuard=performance.now()+450;initAudio();if(toMenu)go('select',-1);else start();}
 function pauseRects(){const y0=H/2-70;return [{y:y0,s:'계속하기',a:resumeGame},{y:y0+60,s:'다시하기',a:()=>quitPause(false)},{y:y0+120,s:'메뉴로',a:()=>quitPause(true)}].map(o=>({...o,x:W/2-110,w:220,h:46}));}
 function pauseTap(x,y){if(paused){if(paused.cd)return true;for(const r of pauseRects())if(x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.h){r.a();break;}return true;}
  const b=pauseBtn();if(Math.hypot(x-b.x,y-b.y)<=26){pauseGame();return true;}return false;}
