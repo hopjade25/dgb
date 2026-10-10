@@ -1,0 +1,107 @@
+[
+ {
+  "id": "artm",
+  "title": "And Revive The Melody",
+  "artist": "Alex Sung / Uaaaaak ver.",
+  "bpm": "70-225",
+  "art": 1,
+  "folder": "ORIGINAL",
+  "music": "data/music/ARTM.json",
+  "charts": {
+   "BASIC": "charts/ARTM-BASIC.dgb",
+   "MEDIUM": "charts/ARTM-MEDIUM.dgb",
+   "HARD": "charts/ARTM-HARD.dgb",
+   "SPECIAL": "charts/ARTM-SPECIAL.dgb"
+  }
+ },
+ {
+  "id": "A",
+  "title": "A",
+  "artist": "MIDI",
+  "bpm": "168",
+  "mid": "A",
+  "folder": "ORIGINAL",
+  "music": "data/music/A.json",
+  "charts": {
+   "BASIC": "charts/A-BASIC.dgb",
+   "MEDIUM": "charts/A-MEDIUM.dgb",
+   "HARD": "charts/A-HARD.dgb",
+   "SPECIAL": "charts/A-SPECIAL.dgb"
+  }
+ },
+ {
+  "id": "B",
+  "title": "B",
+  "artist": "MIDI",
+  "bpm": "180",
+  "mid": "B",
+  "folder": "ORIGINAL",
+  "music": "data/music/B.json",
+  "charts": {
+   "BASIC": "charts/B-BASIC.dgb",
+   "MEDIUM": "charts/B-MEDIUM.dgb",
+   "HARD": "charts/B-HARD.dgb",
+   "SPECIAL": "charts/B-SPECIAL.dgb"
+  }
+ },
+ {
+  "id": "C",
+  "title": "C",
+  "artist": "MIDI",
+  "bpm": "202",
+  "mid": "C",
+  "folder": "ORIGINAL",
+  "music": "data/music/C.json",
+  "charts": {
+   "BASIC": "charts/C-BASIC.dgb",
+   "MEDIUM": "charts/C-MEDIUM.dgb",
+   "HARD": "charts/C-HARD.dgb",
+   "SPECIAL": "charts/C-SPECIAL.dgb"
+  }
+ },
+ {
+  "id": "D",
+  "title": "D",
+  "artist": "MIDI",
+  "bpm": "205-206",
+  "mid": "D",
+  "folder": "ORIGINAL",
+  "music": "data/music/D.json",
+  "charts": {
+   "BASIC": "charts/D-BASIC.dgb",
+   "MEDIUM": "charts/D-MEDIUM.dgb",
+   "HARD": "charts/D-HARD.dgb",
+   "SPECIAL": "charts/D-SPECIAL.dgb"
+  }
+ },
+ {
+  "id": "E",
+  "title": "E",
+  "artist": "MIDI",
+  "bpm": "256",
+  "mid": "E",
+  "folder": "ORIGINAL",
+  "music": "data/music/E.json",
+  "charts": {
+   "BASIC": "charts/E-BASIC.dgb",
+   "MEDIUM": "charts/E-MEDIUM.dgb",
+   "HARD": "charts/E-HARD.dgb",
+   "SPECIAL": "charts/E-SPECIAL.dgb"
+  }
+ },
+ {
+  "id": "F",
+  "title": "F",
+  "artist": "MIDI",
+  "bpm": "275",
+  "mid": "F",
+  "folder": "ORIGINAL",
+  "music": "data/music/F.json",
+  "charts": {
+   "BASIC": "charts/F-BASIC.dgb",
+   "MEDIUM": "charts/F-MEDIUM.dgb",
+   "HARD": "charts/F-HARD.dgb",
+   "SPECIAL": "charts/F-SPECIAL.dgb"
+  }
+ }
+]
