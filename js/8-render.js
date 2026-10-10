@@ -32,7 +32,7 @@ function draw(){const T=performance.now();ctx.setTransform(scale*dpr,0,0,scale*d
  for(const side of ['L','M','R']){const cx=BTNS[side].x,a0=0,a1=Math.PI*2;const pb=Math.max(0,1-(T-press[side])/150);
   ctx.fillStyle=pb>0?`rgba(80,255,130,${.25+.6*pb})`:'#0c2414';ctx.beginPath();ctx.arc(cx,BTN_Y,BD*(1+.08*pb),a0,a1);ctx.closePath();ctx.fill();
   ctx.strokeStyle='#5f8';ctx.lineWidth=3;ctx.beginPath();ctx.arc(cx,BTN_Y,BD-1.5,a0,a1);ctx.stroke();
-  const mx=cx;ctx.fillStyle='rgba(120,255,160,.7)';ctx.beginPath();ctx.moveTo(mx-6,BTN_Y-4);ctx.lineTo(mx+6,BTN_Y-4);ctx.lineTo(mx,BTN_Y+5);ctx.closePath();ctx.fill();}  // TOP ▼ 마크(원작 TOP 표식)
+  const mx=side==='L'?BR*.45:side==='R'?W-BR*.45:cx;ctx.fillStyle='rgba(120,255,160,.7)';ctx.beginPath();ctx.moveTo(mx-6,BTN_Y-4);ctx.lineTo(mx+6,BTN_Y-4);ctx.lineTo(mx,BTN_Y+5);ctx.closePath();ctx.fill();}  // TOP ▼ 마크(원작 TOP 표식)
  // CLEAR GAUGE (VOLZZA): 누적 AR, 70% 클리어 존, 판정 카운트
  const N=notes.length||1,cur=points(me)/(3*N),gx=40,gw=W-80;
  box(gx,GY-3,gw,5,'rgba(40,30,60,.6)');ctx.fillStyle='rgba(230,220,90,.25)';ctx.fillRect(gx+gw*.7,GY-3,gw*.3,5);

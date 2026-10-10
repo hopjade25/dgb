@@ -22,7 +22,7 @@ function finalize(n,kind,pts){n.state=1;if(kind==='miss')n.missed=true;const s=m
   const x=n.type==='G'?BTNS[n.side].x:n.xh;fx.push({type:'ring',x,y:n.ty,t:performance.now(),c:JUD[kind][1],r:n.r});
   if(n.flick){for(let i=0;i<10;i++)fx.push({type:'spark',x,y:n.ty,a:-Math.PI/2+(i-4.5)*.22,t:performance.now()});}
   lineFlash=.5;}
- {const g=n.type==='G',jx=g?BTNS[n.side].x:Math.max(30,Math.min(W-30,n.xh)),jy=g?BTN_Y-BR-10:LINE_Y-BAND/2-10;  // 판정 표시: 노트/버튼 위치
+ {const g=n.type==='G',jx=g?Math.max(36,Math.min(W-36,BTNS[n.side].x)):Math.max(30,Math.min(W-30,n.xh)),jy=g?BTN_Y-BR-10:LINE_Y-BAND/2-10;  // 판정 표시: 노트/버튼 위치
   judgeText=judgeText.filter(j=>Math.abs(j.x-jx)>1||j.y!==jy);judgeText.push({s:JUD[kind][0],c:JUD[kind][1],t:performance.now(),x:jx,y:jy});}}
 function judgeHit(n,t){const off=t-n.time,kind=kindOf(off);n.off=off;if(kind!=='miss')hitSound(kind);
  if(n.long){n.holding=true;n.headKind=kind;n.lastHeld=t;n.hz=n.type==='G'?n.side:'C';fx.push({type:'ring',x:n.type==='G'?BTNS[n.side].x:n.xh,y:n.ty,t:performance.now(),c:JUD[kind][1],r:n.r});return;}

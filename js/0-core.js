@@ -8,7 +8,7 @@
 const W=360,R=28,BAND=56,BR=BAND/2,BTN_HIT=75,SIDE_HIT=75,BAND_HIT=37.5,TOP_RATIO=0.20,MIN_H=600;
 let H=640,LINE_Y=602,SPAWN_Y=70,BTN_Y=475,SAFE_T=0,SAFE_B=0;
 // 레이아웃(사용자 레퍼런스 스크린샷 실측, 필드 내부 비율): 빨강 판정선 85.7% 높이, 초록 버튼 66.0% 높이, 좌우 버튼 중심은 벽에서 12.8% 안쪽
-const LINE_RATIO=0.857,BTN_RATIO=0.660,SIDE_IN=0.128,SIDE_X=Math.round(SIDE_IN*W);
+const LINE_RATIO=0.857,BTN_RATIO=0.660,SIDE_X=0; // 좌우 버튼 = 벽 위 반원(중심 x=0/W, 반만 보임). 높이 66%는 레퍼런스 유지
 const BTNS={L:{x:SIDE_X,tx:SIDE_X},M:{x:W/2,tx:W/2},R:{x:W-SIDE_X,tx:W-SIDE_X}};
 const RED_XS=[0,1,2,3,4,5].map(k=>W*(k+.5)/6);
 const XMIN=R,XMAX=W-R,SPAN=XMAX-XMIN;
