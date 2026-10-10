@@ -22,8 +22,8 @@ function draw(){const T=performance.now();ctx.setTransform(scale*dpr,0,0,scale*d
  if(scene!=='play'){drawMenuT(T);return;}
  const t=now(),GY=(BTN_Y+BR+LINE_Y-BAND/2)/2;
  // 배경: 중앙 큰 반투명 점수/콤보 (VOLZZA: 점수가 화면 중앙, 노트 뒤)
- const big=opt.disp==='SCORE'?me.score:me.combo;
- txt(String(big),W/2,H*.40,'bold 72px sans-serif','rgba(255,90,170,.09)');txt(opt.disp==='SCORE'?'YOUR SCORE':'COMBO',W/2,H*.40-48,'bold 11px sans-serif','rgba(255,90,170,.22)');
+ txt(String(me.score),W/2,H*.40,'bold 72px sans-serif','rgba(255,90,170,.09)');txt('YOUR SCORE',W/2,H*.40-48,'bold 11px sans-serif','rgba(255,90,170,.22)');
+ if(me.combo>1){txt(String(me.combo),W/2,H*.40+62,'bold 40px sans-serif',me.cnt.miss?'rgba(255,255,255,.16)':'rgba(255,221,90,.2)');txt('COMBO',W/2,H*.40+90,'bold 11px sans-serif','rgba(255,221,90,.28)');} // 콤보 = 점수 바로 아래(미스 0이면 노랑)
  ctx.fillStyle='rgba(120,220,255,.55)';ctx.fillRect(0,0,2,H);ctx.fillRect(W-2,0,2,H);
  const pc=Math.max(0,1-(T-press.C)/150);
  const BD=BR;ctx.fillStyle=`rgba(255,60,80,${.07+.22*pc})`;ctx.fillRect(0,LINE_Y-BD,W,BAND); // 밴드·버튼은 오브젝트 크기 옵션과 무관(고정 56)
@@ -56,7 +56,7 @@ function draw(){const T=performance.now();ctx.setTransform(scale*dpr,0,0,scale*d
   else if(f.type==='spark'){const d=20+110*e;ctx.fillStyle='#fff';ctx.fillRect(f.x+Math.cos(f.a)*d-3,f.y+Math.sin(f.a)*d-3,6,6);}
   else{ctx.globalAlpha*=.5;ctx.strokeStyle='#888';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(f.x,f.y,10+20*e,0,7);ctx.stroke();}ctx.globalAlpha=1;return true;});
  if(t<song.meta.LEAD&&song.meta.LEAD-t<=3){const k=Math.ceil(song.meta.LEAD-t),e=k-(song.meta.LEAD-t);ctx.globalAlpha=1-e*.6;txt(String(k),W/2,H*.45,`bold ${Math.round(72-20*e)}px sans-serif`,'#fff');ctx.globalAlpha=1;} // 3-2-1 카운트다운
- if(opt.disp==='SCORE'&&me.combo>1){txt(me.combo+' COMBO',W-10,LINE_Y-BAND/2-12,'bold 13px sans-serif',me.cnt.miss?'rgba(255,255,255,.8)':'rgba(255,221,90,.9)','right');} // 콤보: 미스 0이면 노랑(VOLZZA 2)
+
  judgeText=judgeText.filter(j=>T-j.t<450);for(const j of judgeText){const e=(T-j.t)/450,sz=e<.15?12+e/.15*4:16;ctx.globalAlpha=e<.6?1:1-(e-.6)/.4;ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.8)';ctx.font=`bold ${sz.toFixed(1)}px sans-serif`;ctx.textAlign='center';ctx.strokeText(j.s,j.x,j.y-6*e);txt(j.s,j.x,j.y-6*e,ctx.font,j.c);ctx.globalAlpha=1;}
  // 상단 HUD: 곡명·난이도 / 남은 시간 / 점수
  const top=SAFE_T+16;txt(song.meta.TITLE,46,top,'bold 12px sans-serif','#dde','left');
@@ -85,7 +85,7 @@ function drawMenu(T){
   txt('기준판: REFLEC BEAT VOLZZA 2 시스템',W/2,600,'11px sans-serif','#667');txt(buildLabel(),W/2,620,'10px sans-serif','#556');return;}
  if(scene==='select'){
   box(0,8,W,40,'#14102a');txt('MUSIC SELECT',12,28,'bold 18px sans-serif','#7ff','left');
-  txt(`${HITS[opt.hit][0]} · ${opt.disp}${opt.auto?' · AUTO':''}`,W-12,28,'11px sans-serif','#ccd','right');
+  txt(`${HITS[opt.hit][0]}${opt.auto?' · AUTO':''}`,W-12,28,'11px sans-serif','#ccd','right');
   listTick();const L=folderSongs(),o=rs.findIndex(b=>b.list)+1;if(!L.length)txt('곡 없음 — 아래 [불러오기]',W/2,220,'13px sans-serif','#889');
   ctx.save();ctx.beginPath();ctx.rect(0,LIST_Y,W,LIST_H);ctx.clip();
   L.forEach((s,i)=>{const b={x:8,y:LIST_Y+i*CARD_P-listOff,w:344,h:CARD_H};if(b.y+b.h<LIST_Y||b.y>LIST_Y+LIST_H)return;const on=i===opt.sel,lv=songLevels(s); // 카드형 버튼

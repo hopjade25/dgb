@@ -34,10 +34,8 @@ function rects(){const r=[];
   let lastP=0;slider(r,206,opt.hv,v=>{setHitVol(v);initAudio();const t=performance.now();if(t-lastP>140){lastP=t;hitSound('just');}},v=>Math.round(v*100)+'%',()=>{saveOpt();hitSound('just');});
   r.push({head:'노트 크기',sub:'',y:272});
   {const i=ND_STEPS.indexOf(opt.nd),n=ND_STEPS.length-1;slider(r,288,(i<0?n:i)/n,v=>{opt.nd=ND_STEPS[Math.round(v*n)];},()=>(ND_STEPS.indexOf(opt.nd)+1)+' / 5 단계',()=>saveOpt(),208);r[r.length-1].slider.steps=n;r.push({sample:1,y:288});} // 오른쪽 = 실제 크기 샘플 노트(빨강·초록)
-  r.push({head:'중앙 표시',sub:'',y:354});
-  segRow(r,364,['SCORE','COMBO'],opt.disp==='SCORE'?0:1,i=>{opt.disp=i?'COMBO':'SCORE';},20,156);
-  r.push({head:'자동 플레이',sub:'',y:354,x:184});
-  segRow(r,364,['OFF','ON'],opt.auto?1:0,i=>{opt.auto=!!i;},184,156);
+  r.push({head:'자동 플레이',sub:'',y:354});
+  segRow(r,364,['OFF','ON'],opt.auto?1:0,i=>{opt.auto=!!i;});
   r.push({x:20,y:556,w:320,h:52,act:()=>{go('select',-1);},main:1});}
  if(scene==='result')r.push({x:30,y:560,w:300,h:52,act:()=>{go('select');},main:1});
  return r;}
