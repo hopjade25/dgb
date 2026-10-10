@@ -39,7 +39,7 @@ function parseChart(text){
  // 빨강 레인 점유: 레인마다 [시작,끝] 구간 목록. 노트는 착지 시각 ±LW, 롱은 누르는 동안 전체(+LW). 롱 끝은 미리 짝지어 알아둠
  {const op={};for(const e of ev){if(!e.tok||CH_TARGET[e.ch].type!=='R')continue;const tk=TOK[e.tok];if(tk.end){if(op[e.ch]){op[e.ch].endT=beatToTime(e.beat);delete op[e.ch];}}else if(tk.long)op[e.ch]=e;}}
  const occ=[[],[],[],[],[],[]],lw=b=>Math.max(.1,Math.min(.18,30/bpmAt(b))); // 창 = 현재 BPM의 8분음표 길이, 100~180ms로 제한
- const busy=(k,a,b,skip,ch)=>occ[k].some(o=>o.a<=b&&o.b>=a&&!skip.has(o.n)&&!(ch&&o.n.ch===ch)); // ch: 같은 채널의 자기 연타/트릴 귀환은 충돌 아님
+ const busy=(k,a,b,skip,ch)=>occ[k].some(o=>o.a<=b&&o.b>=a&&!skip.has(o.n)&&!(ch&&o.n.ch===ch&&!o.n.long)); // ch: 같은 채널의 자기 연타/트릴 귀환은 충돌 아님
  let lastR=null;const chLast={};
  for(const e of ev){if(!e.tok)continue;const tk=TOK[e.tok],g=CH_TARGET[e.ch],time=beatToTime(e.beat);
   if(tk.end){const L=openLong[e.ch];if(L){L.end=time;L.endTol=15/bpmAt(e.beat);delete openLong[e.ch];}else warn.push(`${e.li+1}행: 대응하는 L 없는 E`);continue;}
@@ -51,7 +51,7 @@ function parseChart(text){
   let gg=g,occE=null;if(g.type==='R'){const W_=lw(e.beat),a=time-W_,b=(e.endT||time)+W_,skip=new Set();let k=null;
    const chainP=tk.chain&&prev&&!prev.long&&!prev.flick&&prev.lane!=null?prev:null;if(chainP)skip.add(chainP);
    // 트릴: 직전 빨강이 다른 채널이고, 이 채널이 1박 안에 쓰였으면 → 그 노트의 레인으로 돌아감(A-B-A-B 교대 고정)
-   const spb=60/bpmAt(e.beat),cl=chLast[e.ch],trillP=!chainP&&cl&&lastR&&lastR.ch!==e.ch&&time-cl.n.time<=spb+1e-6&&cl.n.lane!==lastR.n.lane?cl.n:null;if(trillP)skip.add(trillP);
+   const spb=60/bpmAt(e.beat),cl=chLast[e.ch],trillP=!chainP&&cl&&!cl.n.long&&lastR&&lastR.ch!==e.ch&&time-cl.n.time<=spb+1e-6&&lastR.n.time>cl.n.time+1e-6&&cl.n.lane!==lastR.n.lane?cl.n:null;if(trillP)skip.add(trillP);
    const pref=chainP||trillP;if(pref&&!busy(pref.lane,a,b,skip,e.ch))k=pref.lane;
    if(k===null){const avoid=lastR&&lastR.ch!==e.ch&&time-lastR.n.time<=spb+1e-6?lastR.n.lane:-1; // 교대 상대와 같은 레인 금지(트릴 붕괴 방지)
     let free=[0,1,2,3,4,5].filter(q=>q!==avoid&&!busy(q,a,b,skip));if(!free.length)free=[0,1,2,3,4,5].filter(q=>!busy(q,a,b,skip));
