@@ -55,6 +55,21 @@ function parseChart(text){
    done.add(A);done.add(B);const [Lc,Rc]=A.xh<B.xh?[ma,mb]:[mb,ma],sp=Math.max(20,Math.abs(A.xh-B.xh)/2);
    const uL=Math.max(XMIN,Lc[0].xh-sp*rnd()),uR=Math.min(XMAX,Rc[0].xh+sp*rnd());
    for(const q of Lc){q.u0=uL;q.vx=(q.xh-uL)/q.fall;q.trill=1;}for(const q of Rc){q.u0=uR;q.vx=(q.xh-uR)/q.fall;q.trill=1;}}}
+ // 동시치기(빨강만/초록만): 평행 이동 — 같은 속도 벡터(같은 방향·속도), 반사 없음. 체인은 체인 전체가 같은 경로를 유지
+ {const by=new Map();for(const n of notes){const k=n.time.toFixed(4);if(!by.has(k))by.set(k,[]);by.get(k).push(n);}
+  const prev=new Map();for(const n of notes)if(n.next)prev.set(n.next,n);
+  const chainOf=n=>{let h=n;while(prev.has(h))h=prev.get(h);const a=[];for(let q=h;q;q=q.next)a.push(q);return a;};
+  // 체인이 여러 동시치기에 걸치면 모두 한 덩어리(union)로 묶어 같은 속도를 공유 — 덮어쓰기로 어긋나는 것 방지
+  const par=new Map(),fd=n=>{while(par.get(n)!==n){par.set(n,par.get(par.get(n)));n=par.get(n);}return n;},un=(a,b)=>{a=fd(a);b=fd(b);if(a!==b)par.set(a,b);};
+  for(const n of notes)par.set(n,n);let any=false;
+  for(const g of by.values()){if(g.length<2)continue;const ty=g[0].type;if(g.some(n=>n.type!==ty))continue; // 빨강만·초록만(섞인 건 예외)
+   any=true;for(const n of g){for(const q of chainOf(n))un(q,g[0]);n.chordPar=1;}}
+  if(any){const comp=new Map();for(const n of notes){if(!n.chordPar)continue;const r=fd(n);if(!comp.has(r))comp.set(r,new Set());}
+   for(const n of notes){const r=fd(n);if(comp.has(r))comp.get(r).add(n);}
+   for(const set of comp.values()){const g=[...set],ty=g[0].type;if(g.some(n=>n.type!==ty))continue;const X0=ty==='R'?XMIN:0,X1=ty==='R'?XMAX:W; // 초록은 벽 통과 → 출발 x 0..W
+    let lo=-1e9,hi=1e9;for(const n of g){lo=Math.max(lo,(n.xh-X1)/n.fall);hi=Math.min(hi,(n.xh-X0)/n.fall);}if(lo>hi)continue;
+    let vx=g.reduce((s,n)=>s+n.vx,0)/g.length;if(Math.abs(vx)>VX_MAX)vx=Math.sign(vx)*VX_MAX;vx=Math.max(lo,Math.min(hi,vx));
+    for(const q of g){q.vx=vx;q.u0=q.xh-vx*q.fall;q.par=1;}}}}
  for(const k in openLong){openLong[k].long=false;warn.push(`${k}: 닫히지 않은 롱`);}
  function makeNote(time,g,u0,fall,tk,phrase){
   const green=g.type==='G',xh=green?BTNS[g.side].tx:RED_XS[g.k],ty=green?BTN_Y:LINE_Y;
