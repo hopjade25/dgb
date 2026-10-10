@@ -6,7 +6,7 @@ function chevron(x,y,s,up){ctx.beginPath();ctx.moveTo(x-s,y+(up?s*.5:-s*.5));ctx
 // 노트 스프라이트: 사용자가 보낸 REFLEC BEAT 스크린샷에서 잘라낸 이미지(data/img/notes, docs/assets-credits.md)
 const NOTE_IMG={};for(const k of ['red','gold','green']){const im=new Image();im.decoding='async';im.src='data/img/notes/'+k+'.png';NOTE_IMG[k]=im;}
 const GREEN_ARROW0=102*Math.PI/180; // green.png 안의 화살표가 가리키는 각도(이미지 좌표, 실측)
-function drawNoteBody(n,x,y,alpha){ctx.globalAlpha=alpha;const r=n.r,im=NOTE_IMG[n.type==='G'?'green':(n.gold?'gold':'red')];
+function drawNoteBody(n,x,y,alpha){ctx.globalAlpha=alpha;const r=n.r,im=NOTE_IMG[n.type==='G'?'green':((n.gold||n.flick)?'gold':'red')];
  if(im&&im.complete&&im.naturalWidth){const sz=r*2;
   if(n.type==='G'){ // 화살표는 항상 자기 버튼 쪽(지나친 뒤엔 마지막 방향 유지 = 진행 방향)
    let a=n.time-now()>=0?Math.atan2(n.ty-y,n.xh-x):Math.atan2(n.vy,n.vx);if(!isFinite(a))a=Math.PI/2;
@@ -15,7 +15,7 @@ function drawNoteBody(n,x,y,alpha){ctx.globalAlpha=alpha;const r=n.r,im=NOTE_IMG
  else{ctx.fillStyle=n.type==='G'?'#2c4':'#e23';ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();}
  if(n.chord){ctx.strokeStyle=n.chord==='R'?'#7a0010':(n.type==='G'?'#06401a':'#7f7');ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y,r+1.5,0,7);ctx.stroke();} // 동시치기: 스프라이트 바깥 얇은 색 링(광채 없음)
  ctx.lineCap='round';ctx.lineJoin='round';
- if(n.flick){ctx.strokeStyle='#5a0008';ctx.lineWidth=7;chevron(x,y-7,11,true);chevron(x,y+6,11,true);ctx.strokeStyle='#fff';ctx.lineWidth=3.5;chevron(x,y-7,11,true);chevron(x,y+6,11,true);}       // 플릭: 흰 이중 ︽
+ // 플릭: 금색 JR 스프라이트로 구분(겉모양만 변경, 화살표 덧그림 없음)
  ctx.globalAlpha=1;}
 function draw(){const T=performance.now();ctx.setTransform(scale*dpr,0,0,scale*dpr,0,0);ctx.textBaseline='middle';
  ctx.fillStyle=scene==='play'?'#05050a':'#0b0718';ctx.fillRect(0,0,W,H);

@@ -1,14 +1,16 @@
 'use strict';
 // ============ 입력 ============
-const ptrs=new Map();let lastIn=0,lastZone={},shiftDown=false;
+const ptrs=new Map(),downIds=new Set();let lastIn=0,shiftDown=false;
 function toLogical(cx,cy){try{const r=cv.getBoundingClientRect();return [(cx-r.left)/r.width*W,(cy-r.top)/r.height*H];}catch(_){return [null,null];}}
 function held(z){if(autoplay)return true;for(const p of ptrs.values())if(p.zone===z)return true;return false;}
 const MOFF=()=>(H-640)/2; // 메뉴는 640 설계 좌표를 세로 중앙 정렬
 function input(e,cx,cy,compat,pid){const tn=performance.now();if(e.cancelable)e.preventDefault();initAudio();
  const [x,y]=toLogical(cx,cy);const zone=scene==='play'?zoneAt(x,y):'any';
  if(pid!=null&&scene==='play')ptrs.set(pid,{zone,x0:x,y0:y,t0:tn});
- if(compat){if(tn-lastIn<600)return;}else if(tn-(lastZone[zone]||0)<40)return;
- lastIn=tn;lastZone[zone]=tn;
+ // 중복 방지는 '같은 손가락'만: 포인터/터치 id별(같은 id가 이미 눌린 상태면 무시). 다른 손가락은 절대 버리지 않음(동시치기)
+ // PointerEvent가 있으면 touchstart는 입력으로 쓰지 않음(아래) → 한 터치가 두 번 들어오지 않음. 마우스 호환 이벤트(mousedown/click)는 600ms 가드
+ if(compat){if(tn-lastIn<600)return;}else if(pid!=null&&downIds.has(pid))return;
+ if(pid!=null&&!compat)downIds.add(pid);lastIn=tn;
  try{if(scene==='play'){if(pauseTap(x,y))return;if(zone)onPlayTap(x,y,zone,pid,false);}else menuTap(x,y-MOFF());}
  catch(err){console.error(err);}}
 function moveP(pid,cx,cy){const p=ptrs.get(pid);const [x,y]=toLogical(cx,cy);if(scene!=='play'){menuMove(x);return;}
@@ -16,12 +18,12 @@ function moveP(pid,cx,cy){const p=ptrs.get(pid);const [x,y]=toLogical(cx,cy);if(
  const f=pendF.get(pid);if(!f)return;
  if(performance.now()-f.w>FLICK_MS||f.n.state){f.n.flickPending=false;pendF.delete(pid);return;}
  if(Math.hypot(x-f.x0,y-f.y0)>=FLICK_MIN){pendF.delete(pid);f.n.flickPending=false;f.n.flickDir=Math.atan2(y-f.y0,x-f.x0);judgeHit(f.n,f.tDown);}}
-function upP(pid){menuUp();ptrs.delete(pid);const f=pendF.get(pid);if(f){f.n.flickPending=false;pendF.delete(pid);}}
+function upP(pid){menuUp();ptrs.delete(pid);downIds.delete(pid);const f=pendF.get(pid);if(f){f.n.flickPending=false;pendF.delete(pid);}}
 const evo={passive:false};
 if(window.PointerEvent){document.addEventListener('pointerdown',e=>input(e,e.clientX,e.clientY,0,'p'+e.pointerId),evo);
  document.addEventListener('pointermove',e=>moveP('p'+e.pointerId,e.clientX,e.clientY),evo);
  ['pointerup','pointercancel'].forEach(n=>document.addEventListener(n,e=>upP('p'+e.pointerId),evo));}
-document.addEventListener('touchstart',e=>{for(const t of e.changedTouches)input(e,t.clientX,t.clientY,0,window.PointerEvent?null:'t'+t.identifier);},evo);
+document.addEventListener('touchstart',e=>{if(window.PointerEvent){if(e.cancelable)e.preventDefault();initAudio();return;}for(const t of e.changedTouches)input(e,t.clientX,t.clientY,0,'t'+t.identifier);},evo);
 document.addEventListener('touchmove',e=>{if(e.cancelable)e.preventDefault();if(!window.PointerEvent)for(const t of e.changedTouches)moveP('t'+t.identifier,t.clientX,t.clientY);},evo);
 if(!window.PointerEvent)['touchend','touchcancel'].forEach(n=>document.addEventListener(n,e=>{for(const t of e.changedTouches)upP('t'+t.identifier);},evo));
 document.addEventListener('touchend',()=>initAudio(),evo);

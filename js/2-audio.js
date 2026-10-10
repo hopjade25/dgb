@@ -41,8 +41,10 @@ let paused=null;
 function pauseBtn(){return {x:24,y:SAFE_T+24,r:15};}
 function pauseGame(){if(scene!=='play'||paused)return;paused={t:now(),cd:0};ptrs.clear();
  for(const f of pendF.values())f.n.flickPending=false;pendF.clear();
- try{if(ac){if(master){master.disconnect();master=ac.createGain();master.gain.value=.7;master.connect(ac.destination);} // 미리 예약된 소리 폐기
-  if(ac.suspend)ac.suspend().catch(()=>{});}}catch(e){}}
+ // 일시정지 무음: 예약된 음악·재생 중 소리를 30ms 페이드아웃 후 끊고(뚝 소리 방지) 오디오 정지. 일시정지 자체의 효과음은 없음
+ try{if(ac){const t=ac.currentTime;for(const g of [master,hitG]){if(!g)continue;try{g.gain.cancelScheduledValues(t);g.gain.setValueAtTime(g.gain.value,t);g.gain.linearRampToValueAtTime(0,t+.03);}catch(_){}}
+  const oldM=master,oldH=hitG;master=ac.createGain();master.gain.value=.7;master.connect(ac.destination);hitG=ac.createGain();hitG.gain.value=.7*opt.hv;hitG.connect(ac.destination);
+  setTimeout(()=>{try{oldM.disconnect();}catch(_){}try{oldH&&oldH.disconnect();}catch(_){}if(paused&&ac.suspend)ac.suspend().catch(()=>{});},60);}}catch(e){}}
 function resumeGame(){if(!paused||paused.cd)return;paused.cd=performance.now();}
 function unfreeze(){const f=paused.t;paused=null;initAudio(); // 시계 재기준: 멈춘 시각 f에서 이어서
  perf0=performance.now()/1000-(f-AT);t0=ac?ac.currentTime-(f-AT):0;audioOK=false;lastAcT=-1;acOff=0;
