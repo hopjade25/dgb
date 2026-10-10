@@ -81,7 +81,8 @@ function parseChart(text){
      const ok=v=>g.every(n=>{const u=n.xh-v*n.fall;return u>=XMIN-1e-6&&u<=XMAX+1e-6;});
      const h=g[0],C=museCands().map(c=>(h.xh-c.u)/h.fall).filter(ok),sl=C.filter(v=>Math.abs(v)*h.fall>SPAN/16);
      const P=sl.length?sl:C,cont=ty==='R'&&runVx!==null&&gt-runT<.6;
-     if(cont&&ok(runVx))vx=runVx;else if(cont&&P.length)vx=P.reduce((a,v)=>Math.abs(v-runVx)<Math.abs(a-runVx)?v:a);else if(P.length)vx=P[Math.floor(rnd()*P.length)];else vx=(rnd()<.5?lo:hi)*.85+(lo+hi)/2*.15;}  // 후보 없으면 허용 범위 끝쪽(기울게)
+     if(cont)vx=Math.max(lo,Math.min(hi,runVx)); // 연속 동시치기: 직전 방향을 허용 범위로 클램프 → 쌍마다 좌우로 뒤집히는 지그재그 방지
+         else if(P.length)vx=P[Math.floor(rnd()*P.length)];else vx=(rnd()<.5?lo:hi)*.85+(lo+hi)/2*.15;}  // 후보 없으면 허용 범위 끝쪽(기울게)
     else{vx=g.reduce((s,n)=>s+n.vx,0)/g.length;vx=Math.max(lo,Math.min(hi,vx));}
     for(const q of g){q.vx=vx;q.u0=q.xh-vx*q.fall;q.par=1;}if(ty==='R'){runVx=vx;runT=Math.max(...g.map(n=>n.time));}}}}
  for(const k in openLong){openLong[k].long=false;warn.push(`${k}: 닫히지 않은 롱`);}
