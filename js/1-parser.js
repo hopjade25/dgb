@@ -30,7 +30,8 @@ function parseChart(text){
  const bpmCh=[{beat:0,bpm:meta.BPM}],spdCh=[{beat:0,m:1}];
  for(const e of ev){if(e.ch==='BP'){if(bpmDef[e.id])bpmCh.push({beat:e.beat,bpm:bpmDef[e.id]});else warn.push(`BPM${e.id} 정의 없음`);}
   if(e.ch==='SP'){if(spdDef[e.id])spdCh.push({beat:e.beat,m:spdDef[e.id]});else warn.push(`SPD${e.id} 정의 없음`);}}
- const LEAD=Math.max(3,meta.LEAD);meta.LEAD=LEAD; // 3-2-1 카운트다운 확보
+ const FALL_K=243; // 사용자 공식: 화면 표시 시간(초) = 243 / (그 노트 판정 시각의 BPM). #FALL 무시
+const e0=ev.find(e=>e.tok),LEAD=Math.max(3,meta.LEAD,e0?FALL_K/(()=>{let v=meta.BPM;for(const c of bpmCh)if(c.beat<=e0.beat+1e-9)v=c.bpm;return v;})()-e0.beat*60/meta.BPM+.3:0);meta.LEAD=LEAD; // 첫 노트가 0초 이전에 출발하지 않도록 // 3-2-1 카운트다운 확보
  function beatToTime(b){let t=LEAD,prev=bpmCh[0];for(let i=1;i<bpmCh.length&&bpmCh[i].beat<b;i++){t+=(bpmCh[i].beat-prev.beat)*60/prev.bpm;prev=bpmCh[i];}return t+(b-prev.beat)*60/prev.bpm;}
  function bpmAt(b){let v=meta.BPM;for(const c of bpmCh)if(c.beat<=b+1e-9)v=c.bpm;return v;}
  function spdAt(b){let m=1;for(const s of spdCh)if(s.beat<=b+1e-9)m=s.m;return m;}
@@ -43,7 +44,7 @@ function parseChart(text){
  let lastR=null;const chLast={};
  for(const e of ev){if(!e.tok)continue;const tk=TOK[e.tok],g=CH_TARGET[e.ch],time=beatToTime(e.beat);
   if(tk.end){const L=openLong[e.ch];if(L){L.end=time;L.endTol=15/bpmAt(e.beat);delete openLong[e.ch];}else warn.push(`${e.li+1}행: 대응하는 L 없는 E`);continue;}
-  let fall=meta.FALL*spdAt(e.beat),u0;const prev=lastIn[e.ch];
+  let fall=FALL_K/bpmAt(e.beat)*spdAt(e.beat),u0;const prev=lastIn[e.ch];
   if(tk.chain&&prev&&prev.long)warn.push(`${e.li+1}행: 롱 뒤에는 체인을 이을 수 없음(롱은 체인 끝에만)`);
   if(tk.chain&&prev&&!prev.long&&!prev.flick){u0=prev.u0;fall=prev.fall;}else u0=undefined;
   if(u0===undefined&&g.type==='G')fall=fall*(BTN_Y-SPAWN_Y)/(LINE_Y-SPAWN_Y); // 초록 세로 속도 = 빨강(어지럼 분석 #3)
@@ -57,7 +58,7 @@ function parseChart(text){
     let free=[0,1,2,3,4,5].filter(q=>q!==avoid&&!busy(q,a,b,skip));if(!free.length)free=[0,1,2,3,4,5].filter(q=>!busy(q,a,b,skip));
     if(free.length)k=free[Math.floor(rnd()*free.length)];
     else{k=[0,1,2,3,4,5].sort((x,y)=>Math.max(0,...occ[x].map(o=>o.b))-Math.max(0,...occ[y].map(o=>o.b)))[0];warn.push(`레인 부족 ${time.toFixed(2)}s`);}
-    if(chainP&&k!==chainP.lane){u0=undefined;fall=meta.FALL*spdAt(e.beat);}}
+    if(chainP&&k!==chainP.lane){u0=undefined;fall=FALL_K/bpmAt(e.beat)*spdAt(e.beat);}}
    occE={a,b};gg=Object.assign({},g,{k});}
   const n=makeNote(time,gg,u0,fall,tk,Math.floor(e.beat/8));if(g.type==='R'){n.lane=gg.k;n.ch=e.ch;n.lw=occE.b-(e.endT||time);occE.n=n;occ[gg.k].push(occE);lastR={ch:e.ch,n};chLast[e.ch]={n};}
   if(tk.chain&&prev&&!prev.long&&!prev.flick&&(n.type!=='R'||n.lane===prev.lane))prev.next=n; // 레인이 갈리면 체인 끊음
