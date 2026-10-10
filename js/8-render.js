@@ -86,13 +86,14 @@ function drawMenu(T){
  if(scene==='select'){
   box(0,8,W,40,'#14102a');txt('MUSIC SELECT',12,28,'bold 18px sans-serif','#7ff','left');
   txt(`${HITS[opt.hit][0]} · ${opt.disp}${opt.auto?' · AUTO':''}`,W-12,28,'11px sans-serif','#ccd','right');
-  FOLDERS.forEach((f,i)=>{const b=rs[i],on=opt.folder===i;box(b.x,b.y,b.w,b.h,on?'#2a5a8a':'rgba(255,255,255,.07)',on?'#7ff':null);txt(f[1],b.x+b.w/2,b.y+b.h/2-7,(on?'bold ':'')+'13px sans-serif',on?'#fff':'#aab');txt(SONGS.filter(s=>f[0]==='ALL'||s.folder===f[0]).length+'곡',b.x+b.w/2,b.y+b.h/2+10,'10px sans-serif',on?'#cde':'#778');});
-  const sb=rs[FOLDERS.length];box(sb.x,sb.y,sb.w,sb.h,'rgba(255,255,255,.07)');txt('정렬: '+['기본','레벨↓','이름'][opt.sort],sb.x+sb.w/2,sb.y+sb.h/2,'13px sans-serif','#ccd');
-  const L=folderSongs();if(!L.length)txt(opt.folder===3?'불러온 곡 없음 — 아래 [불러오기]':'곡 없음',W/2,220,'13px sans-serif','#889');
-  const V=visList();V.L.forEach((s,j)=>{const b=rs[FOLDERS.length+1+j],on=V.off+j===opt.sel,lv=songLevels(s);box(b.x,b.y,b.w,b.h,on?'#26204a':'rgba(255,255,255,.05)',on?'#fd6':'rgba(255,255,255,.12)',on?2:1);
-   txt(s.title,b.x+12,b.y+18,'bold 15px sans-serif','#fff','left');const bst=getBest(s,opt.diff);txt(bst?`${bst.a.toFixed(1)}% ${bst.rank} · ${bst.fc?'FULL COMBO':bst.clear?'CLEARED':'FAILED'}`:`${s.artist} · BPM ${s.bpm}`,b.x+12,b.y+38,'11px sans-serif',bst?(bst.fc?'#fd6':bst.clear?'#7f7':'#f99'):'#99a','left');
-   lv.forEach((v,d)=>{const x=b.x+b.w-108+d*26;ctx.fillStyle=v==null?'rgba(255,255,255,.06)':DCOL[d];ctx.fillRect(x,b.y+14,22,26);txt(v==null?'-':String(v),x+11,b.y+27,'bold 12px sans-serif',v==null?'#556':'#111');});});
-  const s=curSong(),lv=s?songLevels(s):[];const o=FOLDERS.length+1+V.L.length;
+  listTick();const L=folderSongs(),o=rs.findIndex(b=>b.list)+1;if(!L.length)txt('곡 없음 — 아래 [불러오기]',W/2,220,'13px sans-serif','#889');
+  ctx.save();ctx.beginPath();ctx.rect(0,LIST_Y,W,LIST_H);ctx.clip();
+  L.forEach((s,i)=>{const b={x:8,y:LIST_Y+i*CARD_P-listOff,w:344,h:CARD_H};if(b.y+b.h<LIST_Y||b.y>LIST_Y+LIST_H)return;const on=i===opt.sel,lv=songLevels(s); // 카드형 버튼
+   box(b.x,b.y,b.w,b.h,on?'#2c2456':'rgba(255,255,255,.07)',on?'#fd6':'rgba(255,255,255,.18)',on?2.5:1);if(on){ctx.fillStyle='#fd6';ctx.fillRect(b.x+3,b.y+8,4,b.h-16);}
+   txt(s.title,b.x+16,b.y+22,'bold 16px sans-serif','#fff','left');const bst=getBest(s,opt.diff);txt(bst?`${bst.a.toFixed(1)}% ${bst.rank} · ${bst.fc?'FULL COMBO':bst.clear?'CLEARED':'FAILED'}`:`${s.artist} · BPM ${s.bpm}`,b.x+16,b.y+45,'11px sans-serif',bst?(bst.fc?'#fd6':bst.clear?'#7f7':'#f99'):'#99a','left');
+   lv.forEach((v,d)=>{const x=b.x+b.w-112+d*26;ctx.fillStyle=v==null?'rgba(255,255,255,.06)':DCOL[d];ctx.fillRect(x,b.y+19,22,26);txt(v==null?'-':String(v),x+11,b.y+32,'bold 12px sans-serif',v==null?'#556':'#111');});});
+  ctx.restore();{const M=listMax();if(M>0){const th=Math.max(30,LIST_H*LIST_H/(M+LIST_H)),ty=LIST_Y+(LIST_H-th)*Math.max(0,Math.min(1,listOff/M));ctx.fillStyle='rgba(255,255,255,.25)';ctx.fillRect(W-5,ty,3,th);}} // 스크롤 표시
+  const s=curSong(),lv=s?songLevels(s):[];
   DIFFS.forEach((d,i)=>{const b=rs[o+i],ok=lv[i]!=null,on=opt.diff===i&&ok;box(b.x,b.y,b.w,b.h,on?DCOL[i]:'rgba(255,255,255,.06)',ok?DCOL[i]:'#333',on?3:1.5);
    txt(d,b.x+b.w/2,b.y+17,'bold 11px sans-serif',on?'#111':ok?DCOL[i]:'#555');txt(ok?'Lv '+lv[i]:'—',b.x+b.w/2,b.y+38,'bold 16px sans-serif',on?'#111':ok?'#eee':'#555');});
   const [bo,bl,bs,bb]=[rs[o+4],rs[o+5],rs[o+6],rs[o+7]];

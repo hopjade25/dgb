@@ -13,7 +13,7 @@ function input(e,cx,cy,compat,pid){const tn=performance.now();if(e.cancelable)e.
  if(pid!=null&&!compat)downIds.add(pid);lastIn=tn;
  try{if(scene==='play'){if(pauseTap(x,y))return;if(zone)onPlayTap(x,y,zone,pid,false);}else menuTap(x,y-MOFF());}
  catch(err){console.error(err);}}
-function moveP(pid,cx,cy){const p=ptrs.get(pid);const [x,y]=toLogical(cx,cy);if(scene!=='play'){menuMove(x);return;}
+function moveP(pid,cx,cy){const p=ptrs.get(pid);const [x,y]=toLogical(cx,cy);if(scene!=='play'){menuMove(x,y-MOFF());return;}
  if(p)p.zone=zoneAt(x,y)||(p.zone==='C'&&Math.abs(y-LINE_Y)<BAND?'C':null);
  const f=pendF.get(pid);if(!f)return;
  if(performance.now()-f.w>FLICK_MS||f.n.state){resolveFlick(pid,false);return;}
@@ -42,6 +42,6 @@ fileIn.addEventListener('change',()=>{const f=fileIn.files&&fileIn.files[0];if(!
  rd.onload=()=>{try{const text=String(rd.result),s=parseChart(text);if(!s.notes.length)throw new Error('노트 없음');
   const di=Math.max(0,DIFFS.indexOf(String(s.meta.DIFF).toUpperCase()));
   SONGS.push({id:'u'+SONGS.length,title:s.meta.TITLE,artist:s.meta.ARTIST||'user',bpm:s.meta.BPM,custom:1,text,diffName:DIFFS[di],level:+s.meta.LEVEL||'?',folder:'USER'});
-  opt.folder=3;opt.sel=folderSongs().length-1;opt.diff=di;
+  opt.folder=0;opt.sel=folderSongs().length-1;opt.diff=di;listShow(opt.sel);
   loadMsg=`불러옴: ${s.meta.TITLE} (${s.notes.length}개${s.warn.length?', 경고 '+s.warn.length:''})`;}catch(e){loadMsg='불러오기 실패: '+e.message;}};rd.readAsText(f);fileIn.value='';});
 
