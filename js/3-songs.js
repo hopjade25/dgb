@@ -5,8 +5,8 @@ const CHARTS={};window.MIDI_SONGS=window.MIDI_SONGS||{};
 function songLevels(s){if(s.art||s.mid)return [10,10,10,10];return DIFFS.map(d=>d===s.diffName?s.level:null);}
 const FOLDERS=[['ALL','전체'],['USER','불러온 곡']];
 const SIZES=[56,44,34]; // 오브젝트 크기(시각만, 판정 영역 불변 — limelight~ '오브젝트 사이즈' 커스터마이즈 [namu 라임라이트/그루빈]). 34≈원작 실측 9%W
-const NR_MIN=14,NR_MAX=32; // 노트 반지름 슬라이더 범위(논리 px). 이전 3단계 = 28/22/17
-const opt={hv:1,nr:28,size:0,hit:0,disp:'SCORE',offset:0,auto:false,folder:0,sort:0,sel:0,diff:1};
+const ND_STEPS=[34,39.5,45,50.5,56]; // 노트 지름 5단계(논리 px). 최대 56 = 기존 기본값
+const opt={hv:1,nd:56,size:0,hit:0,disp:'SCORE',offset:0,auto:false,folder:0,sort:0,sel:0,diff:1};
 // 타격음(터치 사운드): 합성, 터치 즉시 ac.currentTime에 바로 재생(저지연). localStorage 'dgb.hit'
 const HITS=[['클랩',t=>{nz(t,.5,.09,'bandpass',1400);nz(t+.012,.35,.07,'bandpass',1200);}],['틱',t=>osc(t,'square',2200,0,.12,.03)],
  ['우드',t=>{osc(t,'sine',900,600,.45,.07);}],['림샷',t=>{osc(t,'triangle',520,0,.35,.05);nz(t,.35,.05,'highpass',3000);}],
@@ -18,8 +18,8 @@ const MUSE={};let museP=null;
 function museLoad(){if(museP||!ac)return museP;museP=Promise.all(['just','great','good'].map(k=>fetch('data/sfx/muse-'+k+'.wav').then(r=>r.arrayBuffer())
  .then(b=>new Promise((ok,no)=>{const r=ac.decodeAudioData(b,ok,no);if(r&&r.then)r.then(ok,no);})).then(buf=>{MUSE[k]=buf;}))).catch(e=>{console.warn('MUSE sfx',e);museP=null;});return museP;}
 function museHit(t,k){const buf=MUSE[k||'just']||MUSE.just;if(!buf){museLoad();return;}const s=ac.createBufferSource();s.buffer=buf;s.connect(hitG||master);s.start(t);}
-try{const v=+localStorage.getItem('dgb.hit');if(v>=0&&v<HITS.length)opt.hit=v;const h=localStorage.getItem('dgb.hv');if(h!=null&&+h>=0&&+h<=1)opt.hv=+h;const r=localStorage.getItem('dgb.nr');if(r!=null&&+r>=NR_MIN&&+r<=NR_MAX)opt.nr=+r;}catch(_){}
-function saveOpt(){try{localStorage.setItem('dgb.hit',opt.hit);localStorage.setItem('dgb.hv',opt.hv);localStorage.setItem('dgb.nr',opt.nr);}catch(_){}}
+try{const v=+localStorage.getItem('dgb.hit');if(v>=0&&v<HITS.length)opt.hit=v;const h=localStorage.getItem('dgb.hv');if(h!=null&&+h>=0&&+h<=1)opt.hv=+h;const r=localStorage.getItem('dgb.nd');if(r!=null&&ND_STEPS.includes(+r))opt.nd=+r;}catch(_){}
+function saveOpt(){try{localStorage.setItem('dgb.hit',opt.hit);localStorage.setItem('dgb.hv',opt.hv);localStorage.setItem('dgb.nd',opt.nd);}catch(_){}}
 function setHitVol(v){opt.hv=Math.max(0,Math.min(1,Math.round(v*20)/20));if(hitG)hitG.gain.value=.7*opt.hv;}
 function hitSound(k){const f=HITS[opt.hit][1];if(!f||!audioRunning())return;bus=hitG;try{f(ac.currentTime,k);}catch(e){}bus=null;}
 // ===== 곡 미리듣기: 선택 후 0.4초 → songs.json preview{beat,len}(차트 박 기준) 구간을 페이드 인/아웃으로 반복. 화면 이탈·시작 시 정지 =====

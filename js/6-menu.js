@@ -6,7 +6,7 @@ let trans=null,pressFx=null,menuDrag=null,menuGuard=0;
 function go(to,dir){if(scene===to)return;trans={from:scene,dir:dir||1,t:performance.now()};scene=to;menuDrag=null;}
 const SEG_H=48;
 function segRow(r,y,items,cur,set,x0,w0){x0=x0||20;w0=w0||320;const n=items.length,gw=w0/n;items.forEach((lab,i)=>r.push({x:x0+i*gw+2,y,w:gw-4,h:SEG_H,lab,on:cur===i,act:()=>set(i)}));}
-function slider(r,y,v,set,fmt,end){r.push({x:20,y,w:320,h:SEG_H,slider:{v,fmt},act:x=>set(Math.max(0,Math.min(1,(x-36)/288))),drag:x=>set(Math.max(0,Math.min(1,(x-36)/288))),end});}
+function slider(r,y,v,set,fmt,end,w=320){const L=36,S=w-32,f=x=>set(Math.max(0,Math.min(1,(x-L)/S)));r.push({x:20,y,w,h:SEG_H,slider:{v,fmt},act:f,drag:f,end});}
 function rects(){const r=[];
  if(scene==='title')r.push({x:30,y:470,w:300,h:64,act:()=>{go('select');}});
  if(scene==='select'){
@@ -26,7 +26,7 @@ function rects(){const r=[];
   r.push({head:'타격음 볼륨',sub:'',y:196});
   let lastP=0;slider(r,206,opt.hv,v=>{setHitVol(v);initAudio();const t=performance.now();if(t-lastP>140){lastP=t;hitSound('just');}},v=>Math.round(v*100)+'%',()=>{saveOpt();hitSound('just');});
   r.push({head:'노트 크기',sub:'',y:272});
-  slider(r,288,(opt.nr-NR_MIN)/(NR_MAX-NR_MIN),v=>{opt.nr=Math.round(NR_MIN+v*(NR_MAX-NR_MIN));},v=>'반지름 '+opt.nr,()=>saveOpt());r[r.length-1].slider.note=1; // 손잡이 = 실제 크기 노트(미리보기)
+  {const i=ND_STEPS.indexOf(opt.nd),n=ND_STEPS.length-1;slider(r,288,(i<0?n:i)/n,v=>{opt.nd=ND_STEPS[Math.round(v*n)];},()=>(ND_STEPS.indexOf(opt.nd)+1)+' / 5 단계',()=>saveOpt(),208);r[r.length-1].slider.steps=n;r.push({sample:1,y:288});} // 오른쪽 = 실제 크기 샘플 노트(빨강·초록)
   r.push({head:'중앙 표시',sub:'',y:354});
   segRow(r,364,['SCORE','COMBO'],opt.disp==='SCORE'?0:1,i=>{opt.disp=i?'COMBO':'SCORE';},20,156);
   r.push({head:'자동 플레이',sub:'',y:354,x:184});
