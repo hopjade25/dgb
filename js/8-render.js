@@ -13,7 +13,7 @@ function drawNoteBody(n,x,y,alpha){ctx.globalAlpha=alpha;const r=n.r,im=NOTE_IMG
    ctx.save();ctx.translate(x,y);ctx.rotate(a-GREEN_ARROW0);ctx.drawImage(im,-r,-r,sz,sz);ctx.restore();}
   else ctx.drawImage(im,x-r,y-r,sz,sz);}
  else{ctx.fillStyle=n.type==='G'?'#2c4':'#e23';ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();}
- if(n.chord){ctx.strokeStyle=n.chord==='R'?'#7a0010':'#3f6'; /* 초록 포함 동시치기 = 모든 멤버 같은 초록 링(색·굵기·반지름 동일, 스프라이트 종류 무관) */ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y,r+1.5,0,7);ctx.stroke();} // 동시치기: 스프라이트 바깥 얇은 색 링(광채 없음)
+ if(n.chord){ctx.strokeStyle=n.chord==='R'?'#ffd400':'#3f6'; /* 초록 포함 동시치기 = 모든 멤버 같은 초록 링(색·굵기·반지름 동일, 스프라이트 종류 무관) */ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y,r+1.5,0,7);ctx.stroke();} // 동시치기: 스프라이트 바깥 얇은 색 링(광채 없음)
  ctx.lineCap='round';ctx.lineJoin='round';
  // 플릭: 금색 JR 스프라이트로 구분(겉모양만 변경, 화살표 덧그림 없음)
  ctx.globalAlpha=1;}
