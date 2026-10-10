@@ -10,7 +10,13 @@ const opt={size:0,hit:0,disp:'SCORE',offset:0,auto:false,folder:0,sort:0,sel:0,d
 const HITS=[['클랩',t=>{nz(t,.5,.09,'bandpass',1400);nz(t+.012,.35,.07,'bandpass',1200);}],['틱',t=>osc(t,'square',2200,0,.12,.03)],
  ['우드',t=>{osc(t,'sine',900,600,.45,.07);}],['림샷',t=>{osc(t,'triangle',520,0,.35,.05);nz(t,.35,.05,'highpass',3000);}],
  ['판정별',(t,k)=>{const f={just:1760,great:1320,good:880}[k||'just'];osc(t,'sine',f,0,.25,.06);osc(t,'triangle',f/2,0,.12,.05);}], // REFLET MUSE의 판정별 효과음(just/great/good) 개념 — 소리는 자체 합성
- ['끄기',null]];
+ ['끄기',null],
+ ['MUSE',(t,k)=>museHit(t,k)]]; // REFLET MUSE 0.10.3 판정음(just/great/good.wav, 사용자 결정으로 사용 — docs/assets-credits.md)
+// MUSE 판정음: 선택 시(또는 저장된 선택으로 오디오 시작 시) 지연 로딩 → WebAudio 버퍼로 디코드(저지연)
+const MUSE={};let museP=null;
+function museLoad(){if(museP||!ac)return museP;museP=Promise.all(['just','great','good'].map(k=>fetch('data/sfx/muse-'+k+'.wav').then(r=>r.arrayBuffer())
+ .then(b=>new Promise((ok,no)=>{const r=ac.decodeAudioData(b,ok,no);if(r&&r.then)r.then(ok,no);})).then(buf=>{MUSE[k]=buf;}))).catch(e=>{console.warn('MUSE sfx',e);museP=null;});return museP;}
+function museHit(t,k){const buf=MUSE[k||'just']||MUSE.just;if(!buf){museLoad();return;}const s=ac.createBufferSource();s.buffer=buf;s.connect(master);s.start(t);}
 try{const v=+localStorage.getItem('dgb.hit');if(v>=0&&v<HITS.length)opt.hit=v;}catch(_){}
 function saveOpt(){try{localStorage.setItem('dgb.hit',opt.hit);}catch(_){}}
 function hitSound(k){const f=HITS[opt.hit][1];if(!f||!audioRunning())return;try{f(ac.currentTime,k);}catch(e){}}
