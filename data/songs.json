@@ -150,5 +150,24 @@
    "beat": 928,
    "len": 32
   }
+ },
+ {
+  "id": "MEI",
+  "title": "冥(Mei)",
+  "artist": "DJ Amuro VS Killer",
+  "bpm": "95-200",
+  "mid": "MEI",
+  "folder": "ORIGINAL",
+  "music": "data/music/MEI.json",
+  "charts": {
+   "BASIC": "charts/MEI-BASIC.dgb",
+   "MEDIUM": "charts/MEI-MEDIUM.dgb",
+   "HARD": "charts/MEI-HARD.dgb",
+   "SPECIAL": "charts/MEI-SPECIAL.dgb"
+  },
+  "preview": {
+   "beat": 124,
+   "len": 32
+  }
  }
 ]
