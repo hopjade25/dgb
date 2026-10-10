@@ -16,8 +16,8 @@ function update(){previewTick();if(scene!=='play')return;if(paused){if(paused.cd
   if(t>n.time-n.fall){const p=notePos(n,t);if(n.lastK!==null&&p.k!==n.lastK)fx.push({type:'wall',x:p.x<W/2?0:W,y:p.y,t:performance.now(),c:n.type==='G'?'#6f6':'#f55'});n.lastK=p.k;}}
  if(t>song.endTime)finish();}
 function bonus(s){const m=s.cnt.miss;return m===0?50:m===1?25:m===2?10:0;}   // 미스카운트 보너스(limelight~, VOLZZA 2 선택식 중 하나)
-function points(s){return s.ap;}
-function ar(s){const N=notes.length||1;return Math.floor(points(s)/(3*N+2*(s.flickN||0))*1000)/10;}  // 최대 = 통상 3 × N + 플릭 노트당 +2(5점)  // AR = (3J+2G+Gd)/(3N), 0.1% 단위
+function points(s){return 3*s.cnt.just+2*s.cnt.great+s.cnt.good;} // 달성률(AR)용 — 점수와 별개. 플릭 5점 보너스는 점수에만
+function ar(s){const N=notes.length||1;return Math.round(points(s)/(3*N)*1000)/10;}  // AR = (3J+2G+g)/(3N)×100%, 소수 1자리 반올림 — RemyWiki 'What is REFLEC BEAT' Achievement Rate, docs/reflec-analysis.md §AR  // AR = (3J+2G+Gd)/(3N), 0.1% 단위
 function rank(a){return a>=95?'AAA+':a>=90?'AAA':a>=80?'AA':a>=70?'A':a>=60?'B':'C';}
 function bestKey(s,d){return 'dgb:best:'+s.id+':'+d;}
 function getBest(s,d){try{return JSON.parse(localStorage.getItem(bestKey(s,d))||'null');}catch(_){return null;}}
