@@ -107,7 +107,8 @@ function drawMenu(T){
    if(b.slider){const v=b.slider.v,x0=b.x+16,x1=b.x+b.w-16-56,cy=b.y+b.h/2,tx=b.x+16+(b.w-32)*0; // 트랙 = x 36..324
     const L=36,R2=324,px=L+(R2-L)*v;box(b.x,b.y,b.w,b.h,'rgba(255,255,255,.05)','rgba(255,255,255,.15)');
     ctx.fillStyle='rgba(255,255,255,.18)';ctx.fillRect(L,cy-3,R2-L,6);ctx.fillStyle='#4cd';ctx.fillRect(L,cy-3,px-L,6);
-    ctx.fillStyle=menuDrag&&menuDrag.y===b.y?'#fff':'#bff';ctx.beginPath();ctx.arc(px,cy,menuDrag&&menuDrag.y===b.y?13:11,0,7);ctx.fill();
+    if(b.slider.note){const im=NOTE_IMG.red,r=opt.nr;if(im&&im.complete&&im.naturalWidth)ctx.drawImage(im,px-r,cy-r,2*r,2*r);else{ctx.fillStyle='#f36';ctx.beginPath();ctx.arc(px,cy,r,0,7);ctx.fill();}} // 미리보기: 플레이와 같은 스프라이트·반지름
+    else{ctx.fillStyle=menuDrag&&menuDrag.y===b.y?'#fff':'#bff';ctx.beginPath();ctx.arc(px,cy,menuDrag&&menuDrag.y===b.y?13:11,0,7);ctx.fill();}
     txt(b.slider.fmt(v),340,b.y-10,'bold 13px sans-serif','#7ff','right');continue;}
    if(b.main){box(b.x,b.y,b.w,b.h,'#1d6b7a','#7ff',2);txt('◀ MUSIC SELECT',W/2,b.y+b.h/2,'bold 16px sans-serif','#fff');continue;}
    box(b.x,b.y,b.w,b.h,b.on?'#2a5a8a':'rgba(255,255,255,.07)',b.on?'#7ff':'rgba(255,255,255,.18)',b.on?2:1);

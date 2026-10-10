@@ -11,7 +11,7 @@ function start2(){const s=curSong();if(!s)return;
  try{song=parseChart(chartTextFor(s,opt.diff));}catch(e){console.error(e);loadMsg='차트 오류: '+e.message;return;}
  if(!song.notes.length){loadMsg='노트가 없는 차트';return;}
  song.src=s;if(!s.text&&s.title)song.meta.TITLE=s.title; // 표시 제목은 songs.json 기준(기록 키는 id)
- notes=song.notes;DS=SIZES[opt.size];for(const n of notes){n.r=DS/2;if(n.type==='G'&&n.side!=='M'){n.xh=BTNS[n.side].x;n.vx=(n.xh-n.u0)/n.fall;}}fx=[];me=newSide();me.flickN=notes.filter(n=>n.flick).length;judgeText=[];pendF.clear();autoplay=DEMO||opt.auto;
+ notes=song.notes;DS=opt.nr*2;for(const n of notes){n.r=DS/2;if(n.type==='G'&&n.side!=='M'){n.xh=BTNS[n.side].x;n.vx=(n.xh-n.u0)/n.fall;}}fx=[];me=newSide();me.flickN=notes.filter(n=>n.flick).length;judgeText=[];pendF.clear();autoplay=DEMO||opt.auto;
  perf0=performance.now()/1000;audioOK=false;lastAcT=-1;acOff=0;t0=ac?ac.currentTime:0;schedI=0;scene='play';}
 const JUD={just:['JUST','#7ff'],great:['GREAT','#7f7'],good:['GOOD','#fd6'],miss:['MISS','#f55']};
 function kindOf(off){const d=Math.abs(off);return d<=WIN.just?'just':d<=WIN.great?'great':'good';}

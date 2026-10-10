@@ -25,8 +25,8 @@ function rects(){const r=[];
   segRow(r,130,HITS.slice(4).map(h=>h[0]),opt.hit-4,i=>setHit(i+4),20,320);
   r.push({head:'타격음 볼륨',sub:'',y:196});
   let lastP=0;slider(r,206,opt.hv,v=>{setHitVol(v);initAudio();const t=performance.now();if(t-lastP>140){lastP=t;hitSound('just');}},v=>Math.round(v*100)+'%',()=>{saveOpt();hitSound('just');});
-  r.push({head:'오브젝트 크기',sub:'보이는 크기만 · 판정 영역은 그대로',y:272});
-  segRow(r,288,SIZES.map((z,i)=>['기본','스몰','원작 비율'][i]+' '+z),opt.size,i=>{opt.size=i;});
+  r.push({head:'노트 크기',sub:'',y:272});
+  slider(r,288,(opt.nr-NR_MIN)/(NR_MAX-NR_MIN),v=>{opt.nr=Math.round(NR_MIN+v*(NR_MAX-NR_MIN));},v=>'반지름 '+opt.nr,()=>saveOpt());r[r.length-1].slider.note=1; // 손잡이 = 실제 크기 노트(미리보기)
   r.push({head:'중앙 표시',sub:'',y:354});
   segRow(r,364,['SCORE','COMBO'],opt.disp==='SCORE'?0:1,i=>{opt.disp=i?'COMBO':'SCORE';},20,156);
   r.push({head:'자동 플레이',sub:'',y:354,x:184});
