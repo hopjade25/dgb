@@ -2,7 +2,7 @@
 // ============ 게임 상태 ============
 let DS=56;let scene='title',song=null,notes=[],fx=[],me,judgeText=[],lineFlash=0,result=null,autoplay=false;
 function newSide(){return {score:0,combo:0,maxCombo:0,flick:0,flickN:0,cnt:{just:0,great:0,good:0,miss:0}};}
-function start(noAudio){if(!noAudio)initAudio();const s=curSong();if(!s)return;
+function start(noAudio){stopPreview();pvHold=true;if(!noAudio)initAudio();const s=curSong();if(!s)return;
  if(!playableDiff(s,opt.diff)){opt.diff=songLevels(s).findIndex(v=>v!=null);}
  if(!s.text&&!CHARTS[s.id+'-'+DIFFS[opt.diff]]){loadMsg='불러오는 중…';loadSong(s,opt.diff).then(()=>{loadMsg='';start(true);},e=>{loadMsg='불러오기 실패: '+e.message;});return;}
  start2();}

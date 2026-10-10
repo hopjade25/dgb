@@ -5,7 +5,7 @@ const CHARTS={};window.MIDI_SONGS=window.MIDI_SONGS||{};
 function songLevels(s){if(s.art||s.mid)return [10,10,10,10];return DIFFS.map(d=>d===s.diffName?s.level:null);}
 const FOLDERS=[['ALL','전체'],['USER','불러온 곡']];
 const SIZES=[56,44,34]; // 오브젝트 크기(시각만, 판정 영역 불변 — limelight~ '오브젝트 사이즈' 커스터마이즈 [namu 라임라이트/그루빈]). 34≈원작 실측 9%W
-const opt={size:0,hit:0,disp:'SCORE',offset:0,auto:false,folder:0,sort:0,sel:0,diff:1};
+const opt={hv:1,size:0,hit:0,disp:'SCORE',offset:0,auto:false,folder:0,sort:0,sel:0,diff:1};
 // 타격음(터치 사운드): 합성, 터치 즉시 ac.currentTime에 바로 재생(저지연). localStorage 'dgb.hit'
 const HITS=[['클랩',t=>{nz(t,.5,.09,'bandpass',1400);nz(t+.012,.35,.07,'bandpass',1200);}],['틱',t=>osc(t,'square',2200,0,.12,.03)],
  ['우드',t=>{osc(t,'sine',900,600,.45,.07);}],['림샷',t=>{osc(t,'triangle',520,0,.35,.05);nz(t,.35,.05,'highpass',3000);}],
@@ -16,10 +16,29 @@ const HITS=[['클랩',t=>{nz(t,.5,.09,'bandpass',1400);nz(t+.012,.35,.07,'bandpa
 const MUSE={};let museP=null;
 function museLoad(){if(museP||!ac)return museP;museP=Promise.all(['just','great','good'].map(k=>fetch('data/sfx/muse-'+k+'.wav').then(r=>r.arrayBuffer())
  .then(b=>new Promise((ok,no)=>{const r=ac.decodeAudioData(b,ok,no);if(r&&r.then)r.then(ok,no);})).then(buf=>{MUSE[k]=buf;}))).catch(e=>{console.warn('MUSE sfx',e);museP=null;});return museP;}
-function museHit(t,k){const buf=MUSE[k||'just']||MUSE.just;if(!buf){museLoad();return;}const s=ac.createBufferSource();s.buffer=buf;s.connect(master);s.start(t);}
-try{const v=+localStorage.getItem('dgb.hit');if(v>=0&&v<HITS.length)opt.hit=v;}catch(_){}
-function saveOpt(){try{localStorage.setItem('dgb.hit',opt.hit);}catch(_){}}
-function hitSound(k){const f=HITS[opt.hit][1];if(!f||!audioRunning())return;try{f(ac.currentTime,k);}catch(e){}}
+function museHit(t,k){const buf=MUSE[k||'just']||MUSE.just;if(!buf){museLoad();return;}const s=ac.createBufferSource();s.buffer=buf;s.connect(hitG||master);s.start(t);}
+try{const v=+localStorage.getItem('dgb.hit');if(v>=0&&v<HITS.length)opt.hit=v;const h=localStorage.getItem('dgb.hv');if(h!=null&&+h>=0&&+h<=1)opt.hv=+h;}catch(_){}
+function saveOpt(){try{localStorage.setItem('dgb.hit',opt.hit);localStorage.setItem('dgb.hv',opt.hv);}catch(_){}}
+function setHitVol(v){opt.hv=Math.max(0,Math.min(1,Math.round(v*20)/20));if(hitG)hitG.gain.value=.7*opt.hv;}
+function hitSound(k){const f=HITS[opt.hit][1];if(!f||!audioRunning())return;bus=hitG;try{f(ac.currentTime,k);}catch(e){}bus=null;}
+// ===== 곡 미리듣기: 선택 후 0.4초 → songs.json preview{beat,len}(차트 박 기준) 구간을 페이드 인/아웃으로 반복. 화면 이탈·시작 시 정지 =====
+let pv=null,pvWant=null,pvAt=0,pvLoading=false,pvHold=false;
+function stopPreview(){pvWant=null;if(!pv)return;const g=pv.g;pv=null;try{const t=ac.currentTime;g.gain.cancelScheduledValues(t);g.gain.setValueAtTime(g.gain.value,t);g.gain.linearRampToValueAtTime(0,t+.25);}catch(e){}setTimeout(()=>{try{g.disconnect();}catch(e){}},400);}
+function pvFade(n){const g=pv.g.gain,L=pv.st+n*pv.dur,v=.7,fi=Math.min(.8,pv.dur/4);g.setValueAtTime(0,L);g.linearRampToValueAtTime(v,L+fi);g.setValueAtTime(v,L+pv.dur-fi);g.linearRampToValueAtTime(0,L+pv.dur-.03);}
+function pvPump(){const hz=ac.currentTime+.3;let guard=0;
+ while(pv&&pv.ev.length&&guard++<400){if(pv.i>=pv.ev.length){pv.i=0;pv.n++;pvFade(pv.n);}const e=pv.ev[pv.i],t=pv.st+pv.n*pv.dur+e.t;if(t>hz)break;pv.i++;if(t<ac.currentTime-.02)continue;
+  bus=pv.g;try{if(e.m)mPlay(t,e.m);else if(e.a)aPlay(t,e.a,e.spb);}catch(_){}bus=null;}}
+function previewTick(){
+ if(pvHold){if(scene==='play'||loadMsg!=='불러오는 중…')pvHold=false;else return;}
+ if(scene!=='select'||!audioRunning()||(typeof trans!=='undefined'&&trans)){stopPreview();return;}
+ const s=curSong();if(!s||!s.preview||!s.music){stopPreview();return;}
+ if(pvWant!==s.id){stopPreview();pvWant=s.id;pvAt=performance.now()+400;return;}
+ if(pv){pvPump();return;}if(performance.now()<pvAt||pvLoading)return;
+ const key=s.id,d=playableDiff(s,opt.diff)?opt.diff:0;pvLoading=true;
+ loadSong(s,d).then(()=>{pvLoading=false;if(pvWant!==key||scene!=='select'||!audioRunning())return;
+  const c=parseChart(chartTextFor(s,d)),b0=s.preview.beat,b1=b0+s.preview.len,T0=c.beatToTime(b0),T1=c.beatToTime(b1);
+  const g=ac.createGain();g.gain.value=0;g.connect(ac.destination);
+  pv={key,g,ev:c.music.filter(e=>e.b>=b0&&e.b<b1).map(e=>Object.assign({},e,{t:e.t-T0})),dur:T1-T0,st:ac.currentTime+.08,i:0,n:0};pvFade(0);pvPump();},()=>{pvLoading=false;});}
 let loadMsg='';
 function folderSongs(){const f=FOLDERS[opt.folder][0];let L=SONGS.filter(s=>f==='ALL'||s.folder===f);
  if(opt.sort===1)L=L.slice().sort((a,b)=>(songLevels(b)[opt.diff]||0)-(songLevels(a)[opt.diff]||0));

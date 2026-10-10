@@ -15,6 +15,7 @@ GitHub Pages는 정적 호스팅이라 서버 코드는 없습니다. "백엔드
   "mid":"A",                       // MIDI 계열이면 합성 키(차트 #MUSIC MIDI:A 와 같아야 함)
   "art":1,                         // ARTM 전용 합성기를 쓰면 1 (mid 대신)
   "music":"data/music/A.json",
+  "preview":{"beat":48,"len":32},  // 곡 선택 미리듣기 구간(차트 박 기준, 32박=8마디). 없으면 미리듣기 없음
   "charts":{"BASIC":"charts/A-BASIC.dgb","MEDIUM":"...","HARD":"...","SPECIAL":"..."}}]
 ```
 - 레벨 표시는 현재 내장곡 모두 Lv10(앱의 `songLevels`). 차트의 `#LEVEL`은 파일 안에서도 10으로 둡니다.

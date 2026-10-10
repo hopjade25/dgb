@@ -19,7 +19,7 @@ function drawNoteBody(n,x,y,alpha){ctx.globalAlpha=alpha;const r=n.r,im=NOTE_IMG
  ctx.globalAlpha=1;}
 function draw(){const T=performance.now();ctx.setTransform(scale*dpr,0,0,scale*dpr,0,0);ctx.textBaseline='middle';
  ctx.fillStyle=scene==='play'?'#05050a':'#0b0718';ctx.fillRect(0,0,W,H);
- if(scene!=='play'){ctx.translate(0,MOFF());drawMenu(T);return;}
+ if(scene!=='play'){drawMenuT(T);return;}
  const t=now(),GY=(BTN_Y+BR+LINE_Y-BAND/2)/2;
  // 배경: 중앙 큰 반투명 점수/콤보 (VOLZZA: 점수가 화면 중앙, 노트 뒤)
  const big=opt.disp==='SCORE'?me.score:me.combo;
@@ -67,6 +67,15 @@ function draw(){const T=performance.now();ctx.setTransform(scale*dpr,0,0,scale*d
  if(paused){ctx.fillStyle='rgba(0,0,0,.72)';ctx.fillRect(0,0,W,H);
   if(paused.cd){const k=3-Math.floor((performance.now()-paused.cd)/1000);txt(String(Math.max(1,k)),W/2,H*.45,'bold 64px sans-serif','#fff');}
   else{txt('PAUSE',W/2,H/2-110,'bold 26px sans-serif','#fff');for(const r of pauseRects()){ctx.fillStyle='rgba(255,255,255,.1)';ctx.strokeStyle='#aab';ctx.lineWidth=1.5;ctx.fillRect(r.x,r.y,r.w,r.h);ctx.strokeRect(r.x,r.y,r.w,r.h);txt(r.s,W/2,r.y+r.h/2,'bold 16px sans-serif','#fff');}}}}
+// 메뉴 그리기 + 슬라이드 전환 + 눌림 피드백
+function drawMenuT(T){const base=ctx.getTransform();
+ if(trans){const e0=Math.min(1,(T-trans.t)/320),e=1-Math.pow(1-e0,3),d=trans.dir;
+  if(e0>=1)trans=null;else{const cur=scene;ctx.fillStyle='#07060f';ctx.fillRect(0,0,W,H);
+   ctx.translate(-d*W*e,MOFF());scene=trans.from;try{if(scene!=='play')drawMenu(T);}finally{scene=cur;}
+   ctx.setTransform(base);ctx.translate(d*W*(1-e),MOFF());ctx.fillStyle='#07060f';ctx.fillRect(0,-MOFF(),W,H);drawMenu(T);ctx.setTransform(base);return;}}
+ ctx.translate(0,MOFF());drawMenu(T);
+ if(pressFx){const k=1-(T-pressFx.t)/220;if(k<=0)pressFx=null;else{ctx.fillStyle=`rgba(255,255,255,${.28*k})`;const p=pressFx,s=1-.03*k;ctx.fillRect(p.x+p.w*(1-s)/2,p.y+p.h*(1-s)/2,p.w*s,p.h*s);}}
+ ctx.setTransform(base);}
 function drawMenu(T){
  const rs=rects();
  if(scene==='title'){
@@ -77,9 +86,8 @@ function drawMenu(T){
  if(scene==='select'){
   box(0,8,W,40,'#14102a');txt('MUSIC SELECT',12,28,'bold 18px sans-serif','#7ff','left');
   txt(`${HITS[opt.hit][0]} · ${opt.disp}${opt.auto?' · AUTO':''}`,W-12,28,'11px sans-serif','#ccd','right');
-  FOLDERS.forEach((f,i)=>{const b=rs[i],on=opt.folder===i;box(b.x,b.y,b.w,b.h,on?'#2a5a8a':'rgba(255,255,255,.07)',on?'#7ff':null);txt(f[1],b.x+b.w/2,b.y+b.h/2,(on?'bold ':'')+'11px sans-serif',on?'#fff':'#aab');});
-  const sb=rs[FOLDERS.length];box(sb.x,sb.y,sb.w,sb.h,'rgba(255,255,255,.07)');txt('정렬: '+['기본','레벨↓','이름'][opt.sort],sb.x+sb.w/2,sb.y+12,'11px sans-serif','#ccd');
-  txt(`폴더: ${FOLDERS[opt.folder][1]} (${folderSongs().length}곡)`,12,108,'11px sans-serif','#889','left');
+  FOLDERS.forEach((f,i)=>{const b=rs[i],on=opt.folder===i;box(b.x,b.y,b.w,b.h,on?'#2a5a8a':'rgba(255,255,255,.07)',on?'#7ff':null);txt(f[1],b.x+b.w/2,b.y+b.h/2-7,(on?'bold ':'')+'13px sans-serif',on?'#fff':'#aab');txt(SONGS.filter(s=>f[0]==='ALL'||s.folder===f[0]).length+'곡',b.x+b.w/2,b.y+b.h/2+10,'10px sans-serif',on?'#cde':'#778');});
+  const sb=rs[FOLDERS.length];box(sb.x,sb.y,sb.w,sb.h,'rgba(255,255,255,.07)');txt('정렬: '+['기본','레벨↓','이름'][opt.sort],sb.x+sb.w/2,sb.y+sb.h/2,'13px sans-serif','#ccd');
   const L=folderSongs();if(!L.length)txt(opt.folder===3?'불러온 곡 없음 — 아래 [불러오기]':'곡 없음',W/2,220,'13px sans-serif','#889');
   const V=visList();V.L.forEach((s,j)=>{const b=rs[FOLDERS.length+1+j],on=V.off+j===opt.sel,lv=songLevels(s);box(b.x,b.y,b.w,b.h,on?'#26204a':'rgba(255,255,255,.05)',on?'#fd6':'rgba(255,255,255,.12)',on?2:1);
    txt(s.title,b.x+12,b.y+18,'bold 15px sans-serif','#fff','left');const bst=getBest(s,opt.diff);txt(bst?`${bst.a.toFixed(1)}% ${bst.rank} · ${bst.fc?'FULL COMBO':bst.clear?'CLEARED':'FAILED'}`:`${s.artist} · BPM ${s.bpm}`,b.x+12,b.y+38,'11px sans-serif',bst?(bst.fc?'#fd6':bst.clear?'#7f7':'#f99'):'#99a','left');
@@ -94,8 +102,17 @@ function drawMenu(T){
   txt('◀ 타이틀',bb.x+bb.w/2,bb.y+bb.h/2,'12px sans-serif','#778');
   if(loadMsg)txt(loadMsg,W/2,624,'11px sans-serif','#fd6');return;}
  if(scene==='option'){box(0,8,W,40,'#14102a');txt('OPTION',12,28,'bold 18px sans-serif','#7ff','left');
-  OPTS.forEach((o,i)=>{const b=rs[i];box(b.x,b.y,b.w,b.h,'rgba(255,255,255,.07)','rgba(255,255,255,.18)');txt(o.label(),b.x+14,b.y+20,'bold 15px sans-serif','#fff','left');txt(o.sub(),b.x+14,b.y+40,'10px sans-serif','#99a','left');});
-  const b=rs[OPTS.length];box(b.x,b.y,b.w,b.h,'#1d6b7a','#7ff',2);txt('◀ MUSIC SELECT',W/2,b.y+b.h/2,'bold 16px sans-serif','#fff');return;}
+  for(const b of rs){
+   if(b.head){txt(b.head,(b.x||20)+2,b.y,'bold 13px sans-serif','#dde','left');if(b.sub)txt(b.sub,340,b.y,'10px sans-serif','#889','right');continue;}
+   if(b.slider){const v=b.slider.v,x0=b.x+16,x1=b.x+b.w-16-56,cy=b.y+b.h/2,tx=b.x+16+(b.w-32)*0; // 트랙 = x 36..324
+    const L=36,R2=324,px=L+(R2-L)*v;box(b.x,b.y,b.w,b.h,'rgba(255,255,255,.05)','rgba(255,255,255,.15)');
+    ctx.fillStyle='rgba(255,255,255,.18)';ctx.fillRect(L,cy-3,R2-L,6);ctx.fillStyle='#4cd';ctx.fillRect(L,cy-3,px-L,6);
+    ctx.fillStyle=menuDrag&&menuDrag.y===b.y?'#fff':'#bff';ctx.beginPath();ctx.arc(px,cy,menuDrag&&menuDrag.y===b.y?13:11,0,7);ctx.fill();
+    txt(b.slider.fmt(v),340,b.y-10,'bold 13px sans-serif','#7ff','right');continue;}
+   if(b.main){box(b.x,b.y,b.w,b.h,'#1d6b7a','#7ff',2);txt('◀ MUSIC SELECT',W/2,b.y+b.h/2,'bold 16px sans-serif','#fff');continue;}
+   box(b.x,b.y,b.w,b.h,b.on?'#2a5a8a':'rgba(255,255,255,.07)',b.on?'#7ff':'rgba(255,255,255,.18)',b.on?2:1);
+   txt(b.lab,b.x+b.w/2,b.y+b.h/2,(b.on?'bold ':'')+(b.lab.length>6?'12':'14')+'px sans-serif',b.on?'#fff':'#bbc');}
+  return;}
  if(scene==='result'){const r=result,m=song.meta,di=Math.max(0,DIFFS.indexOf(String(m.DIFF).toUpperCase()));
   box(0,8,W,40,'#14102a');txt('RESULT',12,28,'bold 18px sans-serif','#7ff','left');txt(`${m.DIFF} Lv${m.LEVEL}`,W-12,28,'bold 12px sans-serif',DCOL[di],'right');
   txt(m.TITLE,W/2,72,'bold 16px sans-serif','#fff');

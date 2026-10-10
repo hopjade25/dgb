@@ -1,21 +1,22 @@
 'use strict';
 // ============ 오디오 (WebAudio 합성, 실패 시 무음) ============
-let ac=null,master,noiseBuf,t0=0;
+let ac=null,master,noiseBuf,t0=0,hitG=null,bus=null; // bus: 지금 합성하는 소리의 출력(null=master). 타격음=hitG(볼륨 별도), 미리듣기=pv.g
+const OUT=()=>bus||master;
 function initAudio(){if(paused&&scene==='play')return;try{
- if(!ac){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;ac=new AC();master=ac.createGain();master.gain.value=.7;master.connect(ac.destination);
+ if(!ac){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;ac=new AC();master=ac.createGain();master.gain.value=.7;master.connect(ac.destination);hitG=ac.createGain();hitG.gain.value=.7*opt.hv;hitG.connect(ac.destination);
   const len=Math.floor(ac.sampleRate*.2),buf=ac.createBuffer(1,len,ac.sampleRate),d=buf.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1;noiseBuf=buf;
   const s=ac.createBufferSource();s.buffer=ac.createBuffer(1,1,22050);s.connect(ac.destination);s.start(0);}
  if(ac.state!=='running'){const r=ac.resume();if(r&&r.catch)r.catch(()=>{});}
  if(typeof HITS!=='undefined'&&HITS[opt.hit][0]==='MUSE')museLoad();}catch(e){console.warn('audio disabled',e);ac=null;}}
 function audioRunning(){return ac&&ac.state==='running';}
 function osc(t,type,f0,f1,v,dur){const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(f0,t);if(f1)o.frequency.exponentialRampToValueAtTime(f1,t+dur*.4);
- g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g);g.connect(master);o.start(t);o.stop(t+dur+.02);}
+ g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g);g.connect(OUT());o.start(t);o.stop(t+dur+.02);}
 function hat(t,v){const s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();s.buffer=noiseBuf;f.type='highpass';f.frequency.value=7000;
- g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+.06);s.connect(f);f.connect(g);g.connect(master);s.start(t);s.stop(t+.08);}
+ g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+.06);s.connect(f);f.connect(g);g.connect(OUT());s.start(t);s.stop(t+.08);}
 function sfx(f){if(!audioRunning())return;try{osc(ac.currentTime,'square',f,0,.06,.06);}catch(e){}}
 const mf=m=>440*Math.pow(2,(m-69)/12);
 function nz(t,v,dur,type,fr){const s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();s.buffer=noiseBuf;f.type=type;f.frequency.value=fr;
- g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);s.connect(f);f.connect(g);g.connect(master);s.start(t);s.stop(t+dur+.02);}
+ g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);s.connect(f);f.connect(g);g.connect(OUT());s.start(t);s.stop(t+dur+.02);}
 // MIDI 재생: 트랙 이름으로 정한 음색(0 drum,1 bass,2 lead,3 piano,4 pluck,5 pad / 10-14 드럼 역할 k s h c t). 폰 부하 제한: 20ms당 최대 10발음(드럼 제외)
 let mWin=-1,mCnt=0;
 function mPlay(t,m){const [p,v,c,du]=m,g=v/127;

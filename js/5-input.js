@@ -11,12 +11,12 @@ function input(e,cx,cy,compat,pid){const tn=performance.now();if(e.cancelable)e.
  lastIn=tn;lastZone[zone]=tn;
  try{if(scene==='play'){if(pauseTap(x,y))return;if(zone)onPlayTap(x,y,zone,pid,false);}else menuTap(x,y-MOFF());}
  catch(err){console.error(err);}}
-function moveP(pid,cx,cy){const p=ptrs.get(pid);const [x,y]=toLogical(cx,cy);
+function moveP(pid,cx,cy){const p=ptrs.get(pid);const [x,y]=toLogical(cx,cy);if(scene!=='play'){menuMove(x);return;}
  if(p)p.zone=zoneAt(x,y)||(p.zone==='C'&&Math.abs(y-LINE_Y)<BAND?'C':null);
  const f=pendF.get(pid);if(!f)return;
  if(performance.now()-f.w>FLICK_MS||f.n.state){f.n.flickPending=false;pendF.delete(pid);return;}
  if(Math.hypot(x-f.x0,y-f.y0)>=FLICK_MIN){pendF.delete(pid);f.n.flickPending=false;f.n.flickDir=Math.atan2(y-f.y0,x-f.x0);judgeHit(f.n,f.tDown);}}
-function upP(pid){ptrs.delete(pid);const f=pendF.get(pid);if(f){f.n.flickPending=false;pendF.delete(pid);}}
+function upP(pid){menuUp();ptrs.delete(pid);const f=pendF.get(pid);if(f){f.n.flickPending=false;pendF.delete(pid);}}
 const evo={passive:false};
 if(window.PointerEvent){document.addEventListener('pointerdown',e=>input(e,e.clientX,e.clientY,0,'p'+e.pointerId),evo);
  document.addEventListener('pointermove',e=>moveP('p'+e.pointerId,e.clientX,e.clientY),evo);
@@ -26,6 +26,7 @@ document.addEventListener('touchmove',e=>{if(e.cancelable)e.preventDefault();if(
 if(!window.PointerEvent)['touchend','touchcancel'].forEach(n=>document.addEventListener(n,e=>{for(const t of e.changedTouches)upP('t'+t.identifier);},evo));
 document.addEventListener('touchend',()=>initAudio(),evo);
 document.addEventListener('mousedown',e=>input(e,e.clientX,e.clientY,1));
+if(!window.PointerEvent){document.addEventListener('mousemove',e=>{if(e.buttons)moveP('m',e.clientX,e.clientY);});document.addEventListener('mouseup',()=>menuUp());}
 document.addEventListener('click',e=>input(e,e.clientX,e.clientY,1));
 // 키보드: F/← 왼쪽 · G/↓ 가운데 · J/→ 오른쪽 · Space 빨강(가장 가까운 레인) · Shift+Space 플릭
 const KEYS={Space:'C',KeyF:'L',ArrowLeft:'L',KeyJ:'R',ArrowRight:'R',KeyG:'M',ArrowDown:'M'};

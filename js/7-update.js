@@ -1,6 +1,6 @@
 'use strict';
 // ============ 업데이트 ============
-function update(){if(scene!=='play')return;if(paused){if(paused.cd&&performance.now()-paused.cd>=3000)unfreeze();return;}scheduleAudio();const t=now();
+function update(){previewTick();if(scene!=='play')return;if(paused){if(paused.cd&&performance.now()-paused.cd>=3000)unfreeze();return;}scheduleAudio();const t=now();
  for(const n of notes){
   if(n.state)continue;
   if(n.holding){ if(held(n.hz))n.lastHeld=t;

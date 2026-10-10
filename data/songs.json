@@ -12,6 +12,10 @@
    "MEDIUM": "charts/ARTM-MEDIUM.dgb",
    "HARD": "charts/ARTM-HARD.dgb",
    "SPECIAL": "charts/ARTM-SPECIAL.dgb"
+  },
+  "preview": {
+   "beat": 192,
+   "len": 32
   }
  },
  {
@@ -27,6 +31,10 @@
    "MEDIUM": "charts/A-MEDIUM.dgb",
    "HARD": "charts/A-HARD.dgb",
    "SPECIAL": "charts/A-SPECIAL.dgb"
+  },
+  "preview": {
+   "beat": 48,
+   "len": 32
   }
  },
  {
@@ -42,6 +50,10 @@
    "MEDIUM": "charts/B-MEDIUM.dgb",
    "HARD": "charts/B-HARD.dgb",
    "SPECIAL": "charts/B-SPECIAL.dgb"
+  },
+  "preview": {
+   "beat": 304,
+   "len": 32
   }
  },
  {
@@ -57,6 +69,10 @@
    "MEDIUM": "charts/C-MEDIUM.dgb",
    "HARD": "charts/C-HARD.dgb",
    "SPECIAL": "charts/C-SPECIAL.dgb"
+  },
+  "preview": {
+   "beat": 352,
+   "len": 32
   }
  },
  {
@@ -72,6 +88,10 @@
    "MEDIUM": "charts/D-MEDIUM.dgb",
    "HARD": "charts/D-HARD.dgb",
    "SPECIAL": "charts/D-SPECIAL.dgb"
+  },
+  "preview": {
+   "beat": 336,
+   "len": 32
   }
  },
  {
@@ -87,6 +107,10 @@
    "MEDIUM": "charts/E-MEDIUM.dgb",
    "HARD": "charts/E-HARD.dgb",
    "SPECIAL": "charts/E-SPECIAL.dgb"
+  },
+  "preview": {
+   "beat": 480,
+   "len": 32
   }
  },
  {
@@ -102,6 +126,10 @@
    "MEDIUM": "charts/F-MEDIUM.dgb",
    "HARD": "charts/F-HARD.dgb",
    "SPECIAL": "charts/F-SPECIAL.dgb"
+  },
+  "preview": {
+   "beat": 384,
+   "len": 32
   }
  }
 ]

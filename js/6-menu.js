@@ -1,34 +1,51 @@
 'use strict';
 // ============ 메뉴 (VOLZZA 2 흐름: TITLE → MUSIC SELECT ⇄ OPTION → PLAY → RESULT → MUSIC SELECT) ============
 // 메뉴 좌표는 640 설계 기준 (MOFF로 세로 중앙)
+// 화면 전환: 좌우 슬라이드(ease-out 320ms). dir=1 → 새 화면이 오른쪽에서 들어옴
+let trans=null,pressFx=null,menuDrag=null;
+function go(to,dir){if(scene===to)return;trans={from:scene,dir:dir||1,t:performance.now()};scene=to;menuDrag=null;}
+const SEG_H=48;
+function segRow(r,y,items,cur,set,x0,w0){x0=x0||20;w0=w0||320;const n=items.length,gw=w0/n;items.forEach((lab,i)=>r.push({x:x0+i*gw+2,y,w:gw-4,h:SEG_H,lab,on:cur===i,act:()=>set(i)}));}
+function slider(r,y,v,set,fmt,end){r.push({x:20,y,w:320,h:SEG_H,slider:{v,fmt},act:x=>set(Math.max(0,Math.min(1,(x-36)/288))),drag:x=>set(Math.max(0,Math.min(1,(x-36)/288))),end});}
 function rects(){const r=[];
- if(scene==='title')r.push({x:30,y:470,w:300,h:64,act:()=>{scene='select';}});
+ if(scene==='title')r.push({x:30,y:470,w:300,h:64,act:()=>{go('select');}});
  if(scene==='select'){
-  FOLDERS.forEach((f,i)=>r.push({x:8+i*344/FOLDERS.length,y:58,w:344/FOLDERS.length-4,h:30,act:()=>{opt.folder=i;opt.sel=0;}}));
-  r.push({x:250,y:96,w:102,h:24,act:()=>{opt.sort=(opt.sort+1)%3;}});
-  {const V=visList();V.L.forEach((s,j)=>{const i=V.off+j;r.push({x:8,y:128+j*62,w:344,h:56,act:()=>{if(opt.sel===i&&playableDiff(s,opt.diff))start();else{opt.sel=i;if(!playableDiff(s,opt.diff))opt.diff=songLevels(s).findIndex(v=>v!=null);}}});});}
-  DIFFS.forEach((d,i)=>r.push({x:8+i*87,y:440,w:83,h:56,act:()=>{const s=curSong();if(s&&playableDiff(s,i))opt.diff=i;}}));
-  r.push({x:8,y:512,w:108,h:44,act:()=>{scene='option';}});
-  r.push({x:124,y:512,w:108,h:44,act:()=>{try{fileIn.click();}catch(e){}}});
-  r.push({x:240,y:512,w:112,h:44,act:()=>start(),main:1});
-  r.push({x:8,y:572,w:344,h:40,act:()=>{scene='title';}});}
- if(scene==='option'){OPTS.forEach((o,i)=>r.push({x:20,y:70+i*68,w:320,h:58,act:o.act}));r.push({x:20,y:500,w:320,h:52,act:()=>{scene='select';},main:1});}
- if(scene==='result')r.push({x:30,y:560,w:300,h:52,act:()=>{scene='select';},main:1});
+  FOLDERS.forEach((f,i)=>r.push({x:8+i*116,y:54,w:112,h:44,act:()=>{opt.folder=i;opt.sel=0;}}));
+  r.push({x:240,y:54,w:112,h:44,act:()=>{opt.sort=(opt.sort+1)%3;}});
+  {const V=visList();V.L.forEach((s,j)=>{const i=V.off+j;r.push({x:8,y:106+j*62,w:344,h:56,act:()=>{if(opt.sel===i&&playableDiff(s,opt.diff))start();else{opt.sel=i;if(!playableDiff(s,opt.diff))opt.diff=songLevels(s).findIndex(v=>v!=null);}}});});}
+  DIFFS.forEach((d,i)=>r.push({x:8+i*87,y:428,w:83,h:56,act:()=>{const s=curSong();if(s&&playableDiff(s,i))opt.diff=i;}}));
+  r.push({x:8,y:496,w:108,h:52,act:()=>{go('option');}});
+  r.push({x:124,y:496,w:108,h:52,act:()=>{try{fileIn.click();}catch(e){}}});
+  r.push({x:240,y:496,w:112,h:52,act:()=>start(),main:1});
+  r.push({x:8,y:560,w:344,h:44,act:()=>{go('title',-1);}});}
+ if(scene==='option'){
+  r.push({head:'타격음',sub:'탭하면 미리듣기 · 성공 판정마다 재생',y:62});
+  const setHit=i=>{opt.hit=i;saveOpt();initAudio();const p=HITS[i][0]==='MUSE'?museLoad():null;if(p)p.then(()=>hitSound('just'));else hitSound('just');};
+  segRow(r,78,HITS.slice(0,4).map(h=>h[0]),opt.hit,setHit);
+  segRow(r,130,HITS.slice(4).map(h=>h[0]),opt.hit-4,i=>setHit(i+4),20,320);
+  r.push({head:'타격음 볼륨',sub:'',y:196});
+  let lastP=0;slider(r,206,opt.hv,v=>{setHitVol(v);initAudio();const t=performance.now();if(t-lastP>140){lastP=t;hitSound('just');}},v=>Math.round(v*100)+'%',()=>{saveOpt();hitSound('just');});
+  r.push({head:'오브젝트 크기',sub:'보이는 크기만 · 판정 영역은 그대로',y:272});
+  segRow(r,288,SIZES.map((z,i)=>['기본','스몰','원작 비율'][i]+' '+z),opt.size,i=>{opt.size=i;});
+  r.push({head:'중앙 표시',sub:'',y:354});
+  segRow(r,364,['SCORE','COMBO'],opt.disp==='SCORE'?0:1,i=>{opt.disp=i?'COMBO':'SCORE';},20,156);
+  r.push({head:'자동 플레이',sub:'',y:354,x:184});
+  segRow(r,364,['OFF','ON'],opt.auto?1:0,i=>{opt.auto=!!i;},184,156);
+  r.push({head:'판정 오프셋',sub:'',y:430});
+  slider(r,440,(opt.offset+50)/100,v=>{opt.offset=Math.round(v*20)*5-50;},v=>(opt.offset>0?'+':'')+opt.offset+'ms');
+  r.push({x:20,y:500,w:320,h:44,lab:'차트 파일 불러오기…',act:()=>{try{fileIn.click();}catch(e){}}});
+  r.push({x:20,y:556,w:320,h:52,act:()=>{go('select',-1);},main:1});}
+ if(scene==='result')r.push({x:30,y:560,w:300,h:52,act:()=>{go('select');},main:1});
  return r;}
-const OPTS=[
- {label:()=>`타격음  ${HITS[opt.hit][0]}`,sub:()=>'탭할 때마다 변경 · 미리듣기 · 성공 판정마다 재생',act:()=>{opt.hit=(opt.hit+1)%HITS.length;saveOpt();initAudio();hitSound(true);}},
- {label:()=>`오브젝트 크기  ${['기본','스몰','원작 비율'][opt.size]} (${SIZES[opt.size]}px)`,sub:()=>'노트 지름=밴드 두께 유지 · 판정 영역은 56 고정',act:()=>{opt.size=(opt.size+1)%SIZES.length;}},
- {label:()=>`중앙 표시  ${opt.disp}`,sub:()=>'SCORE / COMBO 전환 (VOLZZA 2)',act:()=>{opt.disp=opt.disp==='SCORE'?'COMBO':'SCORE';}},
- {label:()=>`판정 오프셋  ${opt.offset>0?'+':''}${opt.offset}ms`,sub:()=>'🛠 dgb 자체 (원작엔 없음) · 탭할수록 +10, +50 다음 −50',act:()=>{opt.offset=opt.offset>=50?-50:opt.offset+10;}},
- {label:()=>`자동 플레이  ${opt.auto?'ON':'OFF'}`,sub:()=>'데모 확인용',act:()=>{opt.auto=!opt.auto;}},
- {label:()=>'차트 파일 불러오기…',sub:()=>loadMsg||'.txt / .dgb (docs/chart-format.md)',act:()=>{try{fileIn.click();}catch(e){}}}];
-function menuTap(x,y){if(scene==='title'){scene='select';return;}
- for(const b of rects()){if(x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h){b.act();return;}}}
-function menuKey(k){if(scene==='title'){if(k==='ok')scene='select';return;}
- if(scene==='result'){if(k==='ok'||k==='back')scene='select';return;}
- if(scene==='option'){if(k==='back'||k==='ok')scene='select';return;}
+function menuTap(x,y){if(trans)return;if(scene==='title'){go('select');return;}
+ for(const b of rects()){if(b.act&&x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h){pressFx={x:b.x,y:b.y,w:b.w,h:b.h,t:performance.now()};b.act(x,y);if(b.drag)menuDrag=b;return;}}}
+function menuMove(x){if(menuDrag&&scene==='option')menuDrag.drag(x);}
+function menuUp(){if(menuDrag){const d=menuDrag;menuDrag=null;if(d.end)d.end();}}
+function menuKey(k){if(scene==='title'){if(k==='ok')go('select');return;}
+ if(scene==='result'){if(k==='ok'||k==='back')go('select');return;}
+ if(scene==='option'){if(k==='back'||k==='ok')go('select',-1);return;}
  if(scene==='select'){const L=folderSongs();
   if(k==='up')opt.sel=(opt.sel+L.length-1)%L.length;if(k==='down')opt.sel=(opt.sel+1)%L.length;
   if(k==='left'||k==='right'){const s=curSong();for(let i=1;i<=4;i++){const d=(opt.diff+(k==='right'?i:4-i))%4;if(s&&playableDiff(s,d)){opt.diff=d;break;}}}
-  if(k==='ok')start();if(k==='back')scene='title';}}
+  if(k==='ok')start();if(k==='back')go('title',-1);}}
 
