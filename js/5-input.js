@@ -16,9 +16,9 @@ function input(e,cx,cy,compat,pid){const tn=performance.now();if(e.cancelable)e.
 function moveP(pid,cx,cy){const p=ptrs.get(pid);const [x,y]=toLogical(cx,cy);if(scene!=='play'){menuMove(x);return;}
  if(p)p.zone=zoneAt(x,y)||(p.zone==='C'&&Math.abs(y-LINE_Y)<BAND?'C':null);
  const f=pendF.get(pid);if(!f)return;
- if(performance.now()-f.w>FLICK_MS||f.n.state){f.n.flickPending=false;pendF.delete(pid);return;}
- if(Math.hypot(x-f.x0,y-f.y0)>=FLICK_MIN){pendF.delete(pid);f.n.flickPending=false;f.n.flickDir=Math.atan2(y-f.y0,x-f.x0);judgeHit(f.n,f.tDown);}}
-function upP(pid){menuUp();ptrs.delete(pid);downIds.delete(pid);const f=pendF.get(pid);if(f){f.n.flickPending=false;pendF.delete(pid);}}
+ if(performance.now()-f.w>FLICK_MS||f.n.state){resolveFlick(pid,false);return;}
+ if(Math.hypot(x-f.x0,y-f.y0)>=FLICK_MIN){f.n.flickDir=Math.atan2(y-f.y0,x-f.x0);resolveFlick(pid,true);}}
+function upP(pid){menuUp();ptrs.delete(pid);downIds.delete(pid);if(pendF.has(pid))resolveFlick(pid,false);}
 const evo={passive:false};
 if(window.PointerEvent){document.addEventListener('pointerdown',e=>input(e,e.clientX,e.clientY,0,'p'+e.pointerId),evo);
  document.addEventListener('pointermove',e=>moveP('p'+e.pointerId,e.clientX,e.clientY),evo);

@@ -13,7 +13,8 @@ const BTNS={L:{x:SIDE_X,tx:SIDE_X},M:{x:W/2,tx:W/2},R:{x:W-SIDE_X,tx:W-SIDE_X}};
 const RED_XS=[0,1,2,3,4,5].map(k=>W*(k+.5)/6);
 const XMIN=R,XMAX=W-R,SPAN=XMAX-XMIN;
 const WIN={just:.05,great:.10,good:.15};            // 🛠 dgb 자체 값(원작 수치 미공개)
-const PTS={just:3,great:2,good:1,miss:-3};           // 원작(초대~VOLZZA 2): JUST3 GREAT2 GOOD1 MISS-3
+const PTS={just:3,great:2,good:1,miss:-3};
+const FPTS={just:5,great:3,good:2}; // 플릭 노트를 실제로 튕겼을 때(사용자 규칙: JUST 5). GREAT/GOOD = 통상×5/3 반올림. 탭만 하면 통상 PTS           // 원작(초대~VOLZZA 2): JUST3 GREAT2 GOOD1 MISS-3
 const FLICK_MIN=22,FLICK_MS=280;                     // 🛠 플릭: 터치다운 후 280ms 안에 22px(논리) 이상 이동
 const DIFFS=['BASIC','MEDIUM','HARD','SPECIAL'];     // VOLZZA 2 명칭
 const DCOL=['#4c4','#fc3','#f44','#c6f'];             // 緑·黄·赤·虹(용어집 [G]) — SPECIAL은 보라로 대체
