@@ -29,10 +29,10 @@ function draw(){const T=performance.now();ctx.setTransform(scale*dpr,0,0,scale*d
  const BD=DS/2;ctx.fillStyle=`rgba(255,60,80,${.07+.22*pc})`;ctx.fillRect(0,LINE_Y-BD,W,DS);
  ctx.strokeStyle='rgba(255,150,180,.95)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,LINE_Y-BD);ctx.lineTo(W,LINE_Y-BD);ctx.moveTo(0,LINE_Y+BD);ctx.lineTo(W,LINE_Y+BD);ctx.stroke();
  ctx.strokeStyle=`rgba(255,${120+120*lineFlash},${200+55*lineFlash},.9)`;ctx.lineWidth=2+1.5*lineFlash;ctx.beginPath();ctx.moveTo(0,LINE_Y);ctx.lineTo(W,LINE_Y);ctx.stroke();lineFlash*=.85;
- for(const [side,cx,a0,a1] of [['L',0,-Math.PI/2,Math.PI/2],['M',W/2,0,Math.PI*2],['R',W,Math.PI/2,Math.PI*1.5]]){const pb=Math.max(0,1-(T-press[side])/150);
-  ctx.fillStyle=pb>0?`rgba(80,255,130,${.25+.6*pb})`:'#0c2414';ctx.beginPath();if(side!=='M')ctx.moveTo(cx,BTN_Y-BD);ctx.arc(cx,BTN_Y,BD*(1+.08*pb),a0,a1);ctx.closePath();ctx.fill();
+ for(const side of ['L','M','R']){const cx=BTNS[side].x,a0=0,a1=Math.PI*2;const pb=Math.max(0,1-(T-press[side])/150);
+  ctx.fillStyle=pb>0?`rgba(80,255,130,${.25+.6*pb})`:'#0c2414';ctx.beginPath();ctx.arc(cx,BTN_Y,BD*(1+.08*pb),a0,a1);ctx.closePath();ctx.fill();
   ctx.strokeStyle='#5f8';ctx.lineWidth=3;ctx.beginPath();ctx.arc(cx,BTN_Y,BD-1.5,a0,a1);ctx.stroke();
-  const mx=side==='L'?BD*.45:side==='R'?W-BD*.45:cx;ctx.fillStyle='rgba(120,255,160,.7)';ctx.beginPath();ctx.moveTo(mx-6,BTN_Y-4);ctx.lineTo(mx+6,BTN_Y-4);ctx.lineTo(mx,BTN_Y+5);ctx.closePath();ctx.fill();}  // TOP ▼ 마크(원작 TOP 표식)
+  const mx=cx;ctx.fillStyle='rgba(120,255,160,.7)';ctx.beginPath();ctx.moveTo(mx-6,BTN_Y-4);ctx.lineTo(mx+6,BTN_Y-4);ctx.lineTo(mx,BTN_Y+5);ctx.closePath();ctx.fill();}  // TOP ▼ 마크(원작 TOP 표식)
  // CLEAR GAUGE (VOLZZA): 누적 AR, 70% 클리어 존, 판정 카운트
  const N=notes.length||1,cur=points(me)/(3*N),gx=40,gw=W-80;
  box(gx,GY-3,gw,5,'rgba(40,30,60,.6)');ctx.fillStyle='rgba(230,220,90,.25)';ctx.fillRect(gx+gw*.7,GY-3,gw*.3,5);

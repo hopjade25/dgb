@@ -7,7 +7,9 @@
 // =====================================================================
 const W=360,R=28,BAND=56,BR=BAND/2,BTN_HIT=75,SIDE_HIT=75,BAND_HIT=37.5,TOP_RATIO=0.20,MIN_H=600;
 let H=640,LINE_Y=602,SPAWN_Y=70,BTN_Y=475,SAFE_T=0,SAFE_B=0;
-const BTNS={L:{x:0,tx:0},M:{x:W/2,tx:W/2},R:{x:W,tx:W}};
+// 레이아웃(사용자 레퍼런스 스크린샷 실측, 필드 내부 비율): 빨강 판정선 85.7% 높이, 초록 버튼 66.0% 높이, 좌우 버튼 중심은 벽에서 12.8% 안쪽
+const LINE_RATIO=0.857,BTN_RATIO=0.660,SIDE_IN=0.128,SIDE_X=Math.round(SIDE_IN*W);
+const BTNS={L:{x:SIDE_X,tx:SIDE_X},M:{x:W/2,tx:W/2},R:{x:W-SIDE_X,tx:W-SIDE_X}};
 const RED_XS=[0,1,2,3,4,5].map(k=>W*(k+.5)/6);
 const XMIN=R,XMAX=W-R,SPAN=XMAX-XMIN;
 const WIN={just:.05,great:.10,good:.15};            // 🛠 dgb 자체 값(원작 수치 미공개)
@@ -21,7 +23,7 @@ function resize(){dpr=window.devicePixelRatio||1;const iw=innerWidth||360,ih=inn
  scale=iw/W;let h=ih/scale;if(h<MIN_H){h=MIN_H;scale=ih/MIN_H;}
  let inPlay=false;try{inPlay=scene==='play';}catch(_){}
  if(!inPlay){H=h;const [st,sb]=safeInsets();SAFE_T=st/scale;SAFE_B=sb/scale;
-  LINE_Y=H-SAFE_B-38;SPAWN_Y=SAFE_T+70;const fieldH=H-SAFE_T-SAFE_B;BTN_Y=LINE_Y-TOP_RATIO*fieldH;}
+  SPAWN_Y=SAFE_T+70;const fieldH=H-SAFE_T-SAFE_B;LINE_Y=SAFE_T+LINE_RATIO*fieldH;BTN_Y=SAFE_T+BTN_RATIO*fieldH;}
  cv.style.width=W*scale+'px';cv.style.height=H*scale+'px';cv.width=Math.round(W*scale*dpr);cv.height=Math.round(H*scale*dpr);}
 addEventListener('resize',resize);resize();
 const params=new URLSearchParams(location.search),DEMO=params.has('demo'),AT=+(params.get('at')||0);

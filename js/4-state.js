@@ -10,7 +10,7 @@ function start2(){const s=curSong();if(!s)return;
  if(!playableDiff(s,opt.diff)){opt.diff=songLevels(s).findIndex(v=>v!=null);}
  try{song=parseChart(chartTextFor(s,opt.diff));}catch(e){console.error(e);loadMsg='차트 오류: '+e.message;return;}
  if(!song.notes.length){loadMsg='노트가 없는 차트';return;}
- song.src=s;notes=song.notes;DS=SIZES[opt.size];for(const n of notes){n.r=DS/2;if(n.type==='G'&&n.side!=='M'){n.xh=n.side==='L'?0:W;n.vx=(n.xh-n.u0)/n.fall;}}fx=[];me=newSide();me.flickN=notes.filter(n=>n.flick).length;judgeText=[];pendF.clear();autoplay=DEMO||opt.auto;
+ song.src=s;notes=song.notes;DS=SIZES[opt.size];for(const n of notes){n.r=DS/2;if(n.type==='G'&&n.side!=='M'){n.xh=BTNS[n.side].x;n.vx=(n.xh-n.u0)/n.fall;}}fx=[];me=newSide();me.flickN=notes.filter(n=>n.flick).length;judgeText=[];pendF.clear();autoplay=DEMO||opt.auto;
  perf0=performance.now()/1000;audioOK=false;lastAcT=-1;acOff=0;t0=ac?ac.currentTime:0;schedI=0;scene='play';}
 const JUD={just:['JUST','#7ff'],great:['GREAT','#7f7'],good:['GOOD','#fd6'],miss:['MISS','#f55']};
 function kindOf(off){const d=Math.abs(off);return d<=WIN.just?'just':d<=WIN.great?'great':'good';}
@@ -21,14 +21,14 @@ function finalize(n,kind,pts){n.state=1;if(kind==='miss')n.missed=true;const s=m
   const x=n.type==='G'?BTNS[n.side].x:n.xh;fx.push({type:'ring',x,y:n.ty,t:performance.now(),c:JUD[kind][1],r:n.r});
   if(n.flick){for(let i=0;i<10;i++)fx.push({type:'spark',x,y:n.ty,a:-Math.PI/2+(i-4.5)*.22,t:performance.now()});}
   lineFlash=.5;}
- {const g=n.type==='G',jx=g?(n.side==='L'?36:n.side==='R'?W-36:W/2):Math.max(30,Math.min(W-30,n.xh)),jy=g?BTN_Y-BR-10:LINE_Y-BAND/2-10;  // 판정 표시: 노트/버튼 위치
+ {const g=n.type==='G',jx=g?BTNS[n.side].x:Math.max(30,Math.min(W-30,n.xh)),jy=g?BTN_Y-BR-10:LINE_Y-BAND/2-10;  // 판정 표시: 노트/버튼 위치
   judgeText=judgeText.filter(j=>Math.abs(j.x-jx)>1||j.y!==jy);judgeText.push({s:JUD[kind][0],c:JUD[kind][1],t:performance.now(),x:jx,y:jy});}}
 function judgeHit(n,t){const off=t-n.time,kind=kindOf(off);n.off=off;if(kind!=='miss')hitSound(kind);
  if(n.long){n.holding=true;n.headKind=kind;n.lastHeld=t;n.hz=n.type==='G'?n.side:'C';fx.push({type:'ring',x:n.type==='G'?BTNS[n.side].x:n.xh,y:n.ty,t:performance.now(),c:JUD[kind][1],r:n.r});return;}
  finalize(n,kind);}
 function zoneAt(x,y){if(x==null)return 'C';
  if(Math.abs(y-LINE_Y)<=BAND_HIT)return 'C';                     // 빨강 밴드 터치: LINE_Y±37.5 (높이 75) — 겹치면 밴드 우선
- if(y<LINE_Y-BAND_HIT){if(Math.hypot(x-W/2,y-BTN_Y)<=BTN_HIT)return 'M';if(Math.hypot(x,y-BTN_Y)<=BTN_HIT)return 'L';if(Math.hypot(x-W,y-BTN_Y)<=BTN_HIT)return 'R';} // 초록 3버튼 반경 75
+ if(y<LINE_Y-BAND_HIT){let bz=null,bd=BTN_HIT;for(const z of ['L','M','R']){const d=Math.hypot(x-BTNS[z].x,y-BTN_Y);if(d<=bd){bd=d;bz=z;}}if(bz)return bz;} // 초록 3버튼 반경 75 · 겹치는 곳은 가까운 버튼
  return null;}
 const press={L:0,M:0,R:0,C:0};
 const pendF=new Map(); // pid -> {n,tDown,x0,y0,w}
