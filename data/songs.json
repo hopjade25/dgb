@@ -131,5 +131,24 @@
    "beat": 384,
    "len": 32
   }
+ },
+ {
+  "id": "NEU",
+  "title": "neu(NIENTE)",
+  "artist": "mikan2 (Flat 악보)",
+  "bpm": "69-199",
+  "mid": "NEU",
+  "folder": "ORIGINAL",
+  "music": "data/music/NEU.json",
+  "charts": {
+   "BASIC": "charts/NEU-BASIC.dgb",
+   "MEDIUM": "charts/NEU-MEDIUM.dgb",
+   "HARD": "charts/NEU-HARD.dgb",
+   "SPECIAL": "charts/NEU-SPECIAL.dgb"
+  },
+  "preview": {
+   "beat": 928,
+   "len": 32
+  }
  }
 ]
