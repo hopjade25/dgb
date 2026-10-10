@@ -1,5 +1,5 @@
 // dgb 서비스 워커: 앱 셸 사전 캐시 + 차트/음악 데이터는 처음 받을 때 캐시(오프라인 재생)
-const V='dgb-202610101830';
+const V='dgb-202610101840';
 const SHELL=['./','index.html','css/dgb.css','manifest.webmanifest','data/songs.json','icons/icon-192.png','data/img/notes/red.png','data/img/notes/gold.png','data/img/notes/green.png',
  'js/0-core.js','js/1-parser.js','js/2-audio.js','js/3-songs.js','js/4-state.js','js/5-input.js','js/6-menu.js','js/7-update.js','js/8-render.js'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()));});
