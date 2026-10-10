@@ -79,7 +79,8 @@ function parseChart(text){
 // 경로 규칙(어지럼 분석 반영, docs/reflec-analysis.md §23):
 //  초록 = 고정 출발점(원작 TOP처럼) / 빨강 = 목표 ±1레인 안에서 출발, 가로 속도 ≤170px/s(≈19°),
 //  2마디 프레이즈마다 방향(왼쪽·직하·오른쪽) 하나를 공유, 반사는 13%(체인 공유 포함 실측 ~15–20%) · 상단 절반에서만 · 판정 0.5초 전까지
-const GREEN_SPAWN={L:W/2,M:W/2,R:W/2} // 모든 초록: 중앙 한 점(x=W/2, y=SPAWN_Y)에서 출발,VX_MAX=170,BOUNCE_P=.13;
+// 모든 초록(L/M/R): 중앙 한 점(x=W/2, y=SPAWN_Y)에서 출발해 버튼 중심까지 직선
+const GREEN_SPAWN={L:W/2,M:W/2,R:W/2},VX_MAX=170,BOUNCE_P=.13;
 const phraseDir=p=>{let h=Math.imul(p+7,2654435761)>>>0;h^=h>>>13;return (h%3)-1;};
 function randU0(side,xh,fall,phrase){
  if(side)return GREEN_SPAWN[side];
