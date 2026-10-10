@@ -35,7 +35,12 @@ function parseChart(text){
  function bpmAt(b){let v=meta.BPM;for(const c of bpmCh)if(c.beat<=b+1e-9)v=c.bpm;return v;}
  function spdAt(b){let m=1;for(const s of spdCh)if(s.beat<=b+1e-9)m=s.m;return m;}
  const fixed=String(meta.PATH||'').toUpperCase()==='FIXED'||(meta.PATH==null&&meta._seedGiven);seed=fixed?((meta.SEED>>>0)||1):((Math.random()*4294967296)>>>0);meta.pathMode=fixed?'FIXED':'RANDOM';
- const notes=[],lastIn={},openLong={},laneUsed=new Map();
+ const notes=[],lastIn={},openLong={};
+ // 빨강 레인 점유: 레인마다 [시작,끝] 구간 목록. 노트는 착지 시각 ±LW, 롱은 누르는 동안 전체(+LW). 롱 끝은 미리 짝지어 알아둠
+ {const op={};for(const e of ev){if(!e.tok||CH_TARGET[e.ch].type!=='R')continue;const tk=TOK[e.tok];if(tk.end){if(op[e.ch]){op[e.ch].endT=beatToTime(e.beat);delete op[e.ch];}}else if(tk.long)op[e.ch]=e;}}
+ const occ=[[],[],[],[],[],[]],lw=b=>Math.max(.1,Math.min(.18,30/bpmAt(b))); // 창 = 현재 BPM의 8분음표 길이, 100~180ms로 제한
+ const busy=(k,a,b,skip,ch)=>occ[k].some(o=>o.a<=b&&o.b>=a&&!skip.has(o.n)&&!(ch&&o.n.ch===ch)); // ch: 같은 채널의 자기 연타/트릴 귀환은 충돌 아님
+ let lastR=null;const chLast={};
  for(const e of ev){if(!e.tok)continue;const tk=TOK[e.tok],g=CH_TARGET[e.ch],time=beatToTime(e.beat);
   if(tk.end){const L=openLong[e.ch];if(L){L.end=time;L.endTol=15/bpmAt(e.beat);delete openLong[e.ch];}else warn.push(`${e.li+1}행: 대응하는 L 없는 E`);continue;}
   let fall=meta.FALL*spdAt(e.beat),u0;const prev=lastIn[e.ch];
@@ -43,12 +48,18 @@ function parseChart(text){
   if(tk.chain&&prev&&!prev.long&&!prev.flick){u0=prev.u0;fall=prev.fall;}else u0=undefined;
   if(u0===undefined&&g.type==='G')fall=fall*(BTN_Y-SPAWN_Y)/(LINE_Y-SPAWN_Y); // 초록 세로 속도 = 빨강(어지럼 분석 #3)
   // 빨강 착지 레인 = 매 플레이 무작위(차트 레인 무시, 사용자 규칙). 체인 이음은 앞 노트와 같은 레인, 같은 시각 노트끼리는 서로 다른 레인
-  let gg=g;if(g.type==='R'){const tkey=time.toFixed(4),used=laneUsed.get(tkey)||new Set();let k;
-   if(tk.chain&&prev&&!prev.long&&!prev.flick&&prev.lane!=null&&!used.has(prev.lane))k=prev.lane;
-   else{const free=[0,1,2,3,4,5].filter(q=>!used.has(q));k=free.length?free[Math.floor(rnd()*free.length)]:Math.floor(rnd()*6);
-    if(tk.chain&&prev&&prev.lane!=null&&k!==prev.lane){u0=undefined;fall=meta.FALL*spdAt(e.beat);}}
-   used.add(k);laneUsed.set(tkey,used);gg=Object.assign({},g,{k});}
-  const n=makeNote(time,gg,u0,fall,tk,Math.floor(e.beat/8));if(g.type==='R')n.lane=gg.k;
+  let gg=g,occE=null;if(g.type==='R'){const W_=lw(e.beat),a=time-W_,b=(e.endT||time)+W_,skip=new Set();let k=null;
+   const chainP=tk.chain&&prev&&!prev.long&&!prev.flick&&prev.lane!=null?prev:null;if(chainP)skip.add(chainP);
+   // 트릴: 직전 빨강이 다른 채널이고, 이 채널이 1박 안에 쓰였으면 → 그 노트의 레인으로 돌아감(A-B-A-B 교대 고정)
+   const spb=60/bpmAt(e.beat),cl=chLast[e.ch],trillP=!chainP&&cl&&lastR&&lastR.ch!==e.ch&&time-cl.n.time<=spb+1e-6&&cl.n.lane!==lastR.n.lane?cl.n:null;if(trillP)skip.add(trillP);
+   const pref=chainP||trillP;if(pref&&!busy(pref.lane,a,b,skip,e.ch))k=pref.lane;
+   if(k===null){const avoid=lastR&&lastR.ch!==e.ch&&time-lastR.n.time<=spb+1e-6?lastR.n.lane:-1; // 교대 상대와 같은 레인 금지(트릴 붕괴 방지)
+    let free=[0,1,2,3,4,5].filter(q=>q!==avoid&&!busy(q,a,b,skip));if(!free.length)free=[0,1,2,3,4,5].filter(q=>!busy(q,a,b,skip));
+    if(free.length)k=free[Math.floor(rnd()*free.length)];
+    else{k=[0,1,2,3,4,5].sort((x,y)=>Math.max(0,...occ[x].map(o=>o.b))-Math.max(0,...occ[y].map(o=>o.b)))[0];warn.push(`레인 부족 ${time.toFixed(2)}s`);}
+    if(chainP&&k!==chainP.lane){u0=undefined;fall=meta.FALL*spdAt(e.beat);}}
+   occE={a,b};gg=Object.assign({},g,{k});}
+  const n=makeNote(time,gg,u0,fall,tk,Math.floor(e.beat/8));if(g.type==='R'){n.lane=gg.k;n.ch=e.ch;n.lw=occE.b-(e.endT||time);occE.n=n;occ[gg.k].push(occE);lastR={ch:e.ch,n};chLast[e.ch]={n};}
   if(tk.chain&&prev&&!prev.long&&!prev.flick&&(n.type!=='R'||n.lane===prev.lane))prev.next=n; // 레인이 갈리면 체인 끊음
   lastIn[e.ch]=n;if(tk.long)openLong[e.ch]=n;}
  // 트릴: 시간차로 교대하는 빨강 체인 2개 → 서로 교차하지 않는 경로(왼쪽 레인 체인은 왼쪽에서, 오른쪽은 오른쪽에서, 반사 없음)
@@ -112,14 +123,14 @@ function parseChart(text){
 //  dgb 적용: 출발점 = 위쪽 7칸 격자(XMIN+SPAN·(k+1)/8) 중 무작위 — 목표와 무관(각도 상한·±1레인 규칙 없음).
 //  반사: 출발점을 가까운 벽 기준으로 거울상(펼친 좌표) → 정확히 1회 반사. 확률 MUSE_BOUNCE(미복원 값, dgb 추정).
 // 모든 초록(L/M/R): 중앙 한 점(x=W/2, y=SPAWN_Y)에서 출발해 버튼 중심까지 직선(사용자 규칙)
-const GREEN_SPAWN={L:W/2,M:W/2,R:W/2},VX_MAX=1e9,MUSE_BOUNCE=.35;
-const MUSE_XS=[0,1,2,3,4,5,6].map(k=>XMIN+SPAN*(k+1)/8);
+const GREEN_SPAWN={L:W/2,M:W/2,R:W/2},VX_MAX=1e9,MUSE_BOUNCE=.8; // 사용자 지정 80%
+const MUSE_XS=[2,3,4].map(k=>XMIN+SPAN*(k+1)/8); // 사용자 지정: 7칸 중 가운데 3칸만
 // 출발점 후보(펼친 좌표 u0): 직진 7개 + 왼벽 거울 7개 + 오른벽 거울 7개 — 모두 반사 ≤1회
 function museCands(){const c=[];for(const x of MUSE_XS){c.push({u:x,b:0});c.push({u:2*XMIN-x,b:1});c.push({u:2*XMAX-x,b:1});}return c;}
 function randU0(side,xh,fall,phrase){
  if(side)return GREEN_SPAWN[side];
- const x=MUSE_XS[Math.floor(rnd()*7)];
- if(rnd()<MUSE_BOUNCE)return x<W/2?2*XMIN-x:2*XMAX-x; // 출발점과 가까운 벽으로 1회 반사
+ const x=MUSE_XS[Math.floor(rnd()*MUSE_XS.length)];
+ if(rnd()<MUSE_BOUNCE)return rnd()<.5?2*XMIN-x:2*XMAX-x; // 반사 벽 = 왼/오 50:50 (펼친 좌표 → 어느 레인이든 정확히 1회 반사)
  return x;}
 
 // ============ 랜덤 차트 생성기 → 텍스트(파서로 읽음) ============
