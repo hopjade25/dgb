@@ -30,4 +30,5 @@ addEventListener('resize',resize);resize();
 const params=new URLSearchParams(location.search),DEMO=params.has('demo'),AT=+(params.get('at')||0);
 let seed=1;function rnd(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;}
 function fold(u){let p=u-XMIN,k=Math.floor(p/SPAN),m=p-k*SPAN;if(m<0)m+=SPAN;return {x:(k&1)?XMAX-m:XMIN+m,k};}
-
+// 빌드 표시: BUILD(dgb-YYYYMMDDHHMM, 서울 시간) → 'build 2026-10-10 19:07 KST'
+function buildLabel(){const m=String(typeof BUILD!=='undefined'?BUILD:'').match(/(\d{4})(\d\d)(\d\d)(\d\d)(\d\d)/);return m?`build ${m[1]}-${m[2]}-${m[3]} ${m[4]}:${m[5]} KST`:'build dev';}

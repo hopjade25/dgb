@@ -37,11 +37,5 @@ addEventListener('keydown',e=>{if(e.key==='Shift')shiftDown=true;if(scene==='pla
  const z=KEYS[e.code];if(!z)return;e.preventDefault();if(e.repeat)return;initAudio();
  try{ptrs.set('k'+e.code,{zone:z});onPlayTap(z==='C'?null:BTNS[z].x,null,z,'k'+e.code,shiftDown);}catch(err){console.error(err);}});
 addEventListener('keyup',e=>{if(e.key==='Shift')shiftDown=false;ptrs.delete('k'+e.code);});
-const fileIn=document.getElementById('f');
-fileIn.addEventListener('change',()=>{const f=fileIn.files&&fileIn.files[0];if(!f)return;const rd=new FileReader();
- rd.onload=()=>{try{const text=String(rd.result),s=parseChart(text);if(!s.notes.length)throw new Error('노트 없음');
-  const di=Math.max(0,DIFFS.indexOf(String(s.meta.DIFF).toUpperCase()));
-  SONGS.push({id:'u'+SONGS.length,title:s.meta.TITLE,artist:s.meta.ARTIST||'user',bpm:s.meta.BPM,custom:1,text,diffName:DIFFS[di],level:+s.meta.LEVEL||'?',folder:'USER'});
-  opt.folder=0;opt.sel=folderSongs().length-1;opt.diff=di;listShow(opt.sel);
-  loadMsg=`불러옴: ${s.meta.TITLE} (${s.notes.length}개${s.warn.length?', 경고 '+s.warn.length:''})`;}catch(e){loadMsg='불러오기 실패: '+e.message;}};rd.readAsText(f);fileIn.value='';});
+
 

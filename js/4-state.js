@@ -36,7 +36,7 @@ const pendF=new Map(); // pid -> {n,tDown,x0,y0,w}
 // 터치다운: 가장 타이밍이 가까운 후보를 고름. 후보가 플릭이면 "플릭 대기": FLICK_MS 안에 튕기면 플릭(5점), 아니면(손 뗌/시간 초과) 터치다운 시각으로 탭 판정(3점)
 function resolveFlick(pid,flicked){const f=pendF.get(pid);if(!f)return;pendF.delete(pid);f.n.flickPending=false;if(f.n.state)return;f.n.flicked=flicked;judgeHit(f.n,f.tDown);}
 function onPlayTap(px,py,zone,pid,flickNow){press[zone]=performance.now();if(autoplay)return;
- const t=now()-opt.offset/1000;let best=null,bs=1e9;
+ const t=now(); // 판정 오프셋 옵션 제거(항상 0)let best=null,bs=1e9;
  for(const n of notes){if(n.state||n.holding||n.flickPending)continue;const d=Math.abs(n.time-t);if(d>WIN.good)continue;
   if(zone==='C'?n.type!=='R':(n.type!=='G'||n.side!==zone))continue;
   const p=notePos(n,t),dx=px==null||zone!=='C'?0:Math.abs(p.x-px),s=d+(dx>110?1:dx/2000);if(s<bs){bs=s;best=n;}}

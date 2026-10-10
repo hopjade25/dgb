@@ -22,9 +22,8 @@ function rects(){const r=[];
   opt.folder=0;opt.sort=0; // 상단 폴더 탭(전체/불러온 곡)·정렬 버튼 제거 → 항상 전체·기본순
   r.push({x:8,y:LIST_Y,w:344,h:LIST_H,list:1,act:(x,y)=>{pressFx=null;listVel=0;const t=performance.now();listDrag={y0:y,off0:listOff,moved:false,ly:y,lt:t,v:0};}});
   DIFFS.forEach((d,i)=>r.push({x:8+i*87,y:428,w:83,h:56,act:()=>{const s=curSong();if(s&&playableDiff(s,i))opt.diff=i;}}));
-  r.push({x:8,y:496,w:108,h:52,act:()=>{go('option');}});
-  r.push({x:124,y:496,w:108,h:52,act:()=>{try{fileIn.click();}catch(e){}}});
-  r.push({x:240,y:496,w:112,h:52,act:()=>start(),main:1});
+  r.push({x:8,y:496,w:168,h:52,act:()=>{go('option');}});
+  r.push({x:184,y:496,w:168,h:52,act:()=>start(),main:1});
   r.push({x:8,y:560,w:344,h:44,act:()=>{go('title',-1);}});}
  if(scene==='option'){
   r.push({head:'타격음',sub:'탭하면 미리듣기 · 성공 판정마다 재생',y:62});
@@ -39,9 +38,6 @@ function rects(){const r=[];
   segRow(r,364,['SCORE','COMBO'],opt.disp==='SCORE'?0:1,i=>{opt.disp=i?'COMBO':'SCORE';},20,156);
   r.push({head:'자동 플레이',sub:'',y:354,x:184});
   segRow(r,364,['OFF','ON'],opt.auto?1:0,i=>{opt.auto=!!i;},184,156);
-  r.push({head:'판정 오프셋',sub:'',y:430});
-  slider(r,440,(opt.offset+50)/100,v=>{opt.offset=Math.round(v*20)*5-50;},v=>(opt.offset>0?'+':'')+opt.offset+'ms');
-  r.push({x:20,y:500,w:320,h:44,lab:'차트 파일 불러오기…',act:()=>{try{fileIn.click();}catch(e){}}});
   r.push({x:20,y:556,w:320,h:52,act:()=>{go('select',-1);},main:1});}
  if(scene==='result')r.push({x:30,y:560,w:300,h:52,act:()=>{go('select');},main:1});
  return r;}

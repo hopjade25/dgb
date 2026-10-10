@@ -6,7 +6,7 @@ function songLevels(s){if(s.art||s.mid)return [10,10,10,10];return DIFFS.map(d=>
 const FOLDERS=[['ALL','전체'],['USER','불러온 곡']];
 const SIZES=[56,44,34]; // 오브젝트 크기(시각만, 판정 영역 불변 — limelight~ '오브젝트 사이즈' 커스터마이즈 [namu 라임라이트/그루빈]). 34≈원작 실측 9%W
 const ND_STEPS=[34,39.5,45,50.5,56]; // 노트 지름 5단계(논리 px). 최대 56 = 기존 기본값
-const opt={hv:1,nd:56,size:0,hit:0,disp:'SCORE',offset:0,auto:false,folder:0,sort:0,sel:0,diff:1};
+const opt={hv:1,nd:56,size:0,hit:0,disp:'SCORE',auto:false,folder:0,sort:0,sel:0,diff:1};
 // 타격음(터치 사운드): 합성, 터치 즉시 ac.currentTime에 바로 재생(저지연). localStorage 'dgb.hit'
 const HITS=[['클랩',t=>{nz(t,.5,.09,'bandpass',1400);nz(t+.012,.35,.07,'bandpass',1200);}],['틱',t=>osc(t,'square',2200,0,.12,.03)],
  ['우드',t=>{osc(t,'sine',900,600,.45,.07);}],['림샷',t=>{osc(t,'triangle',520,0,.35,.05);nz(t,.35,.05,'highpass',3000);}],

@@ -82,7 +82,7 @@ function drawMenu(T){
   ctx.strokeStyle='rgba(120,220,255,.25)';ctx.lineWidth=2;for(let i=0;i<5;i++){ctx.beginPath();ctx.arc(W/2,250,40+i*26+6*Math.sin(T/600+i),0,7);ctx.stroke();}
   txt('dgb',W/2,250,'bold 64px sans-serif','#fff');txt('Reflec Beat 오마주 · 1인용 리듬 게임',W/2,340,'14px sans-serif','#aab');
   const b=rs[0];box(b.x,b.y,b.w,b.h,'#1d6b7a','#7ff',2);ctx.globalAlpha=.7+.3*Math.sin(T/300);txt('TAP TO START',W/2,b.y+b.h/2,'bold 24px sans-serif','#fff');ctx.globalAlpha=1;
-  txt('기준판: REFLEC BEAT VOLZZA 2 시스템',W/2,600,'11px sans-serif','#667');return;}
+  txt('기준판: REFLEC BEAT VOLZZA 2 시스템',W/2,600,'11px sans-serif','#667');txt(buildLabel(),W/2,620,'10px sans-serif','#556');return;}
  if(scene==='select'){
   box(0,8,W,40,'#14102a');txt('MUSIC SELECT',12,28,'bold 18px sans-serif','#7ff','left');
   txt(`${HITS[opt.hit][0]} · ${opt.disp}${opt.auto?' · AUTO':''}`,W-12,28,'11px sans-serif','#ccd','right');
@@ -96,13 +96,12 @@ function drawMenu(T){
   const s=curSong(),lv=s?songLevels(s):[];
   DIFFS.forEach((d,i)=>{const b=rs[o+i],ok=lv[i]!=null,on=opt.diff===i&&ok;box(b.x,b.y,b.w,b.h,on?DCOL[i]:'rgba(255,255,255,.06)',ok?DCOL[i]:'#333',on?3:1.5);
    txt(d,b.x+b.w/2,b.y+17,'bold 11px sans-serif',on?'#111':ok?DCOL[i]:'#555');txt(ok?'Lv '+lv[i]:'—',b.x+b.w/2,b.y+38,'bold 16px sans-serif',on?'#111':ok?'#eee':'#555');});
-  const [bo,bl,bs,bb]=[rs[o+4],rs[o+5],rs[o+6],rs[o+7]];
+  const [bo,bs,bb]=[rs[o+4],rs[o+5],rs[o+6]];
   box(bo.x,bo.y,bo.w,bo.h,'rgba(255,255,255,.08)','#99a');txt('OPTION',bo.x+bo.w/2,bo.y+bo.h/2,'bold 14px sans-serif','#dde');
-  box(bl.x,bl.y,bl.w,bl.h,'rgba(255,255,255,.08)','#99a');txt('불러오기',bl.x+bl.w/2,bl.y+bl.h/2,'bold 14px sans-serif','#dde');
   box(bs.x,bs.y,bs.w,bs.h,'#1d6b7a','#7ff',2);txt('▶ START',bs.x+bs.w/2,bs.y+bs.h/2,'bold 17px sans-serif','#fff');
   txt('◀ 타이틀',bb.x+bb.w/2,bb.y+bb.h/2,'12px sans-serif','#778');
   if(loadMsg)txt(loadMsg,W/2,624,'11px sans-serif','#fd6');return;}
- if(scene==='option'){box(0,8,W,40,'#14102a');txt('OPTION',12,28,'bold 18px sans-serif','#7ff','left');
+ if(scene==='option'){box(0,8,W,40,'#14102a');txt(buildLabel(),W/2,532,'11px sans-serif','#778');txt('OPTION',12,28,'bold 18px sans-serif','#7ff','left');
   for(const b of rs){
    if(b.head){txt(b.head,(b.x||20)+2,b.y,'bold 13px sans-serif','#dde','left');if(b.sub)txt(b.sub,340,b.y,'10px sans-serif','#889','right');continue;}
    if(b.sample){const r=opt.nd/2,cy=b.y+SEG_H/2; // 실제 플레이 크기 샘플(빨강·초록 스프라이트)
