@@ -65,7 +65,7 @@ const e0=ev.find(e=>e.tok),LEAD=Math.max(3,meta.LEAD,e0?FALL_K/(()=>{let v=meta.
   lastIn[e.ch]=n;if(tk.long)openLong[e.ch]=n;}
  // 트릴: 시간차로 교대하는 빨강 체인 2개 → 서로 교차하지 않는 경로(왼쪽 레인 체인은 왼쪽에서, 오른쪽은 오른쪽에서, 반사 없음)
  //  근거: atwiki 용어집 'トリル'(時間差で来る2本のチェイン), Tips '2本のチェイン(トリル)が判定ライン直前でクロスしなくなった'
- {const isNext=new Set(notes.map(n=>n.next).filter(Boolean)),heads=notes.filter(n=>n.next&&!isNext.has(n)&&n.type==='R');
+ if(false){const isNext=new Set(notes.map(n=>n.next).filter(Boolean)),heads=notes.filter(n=>n.next&&!isNext.has(n)&&n.type==='R');
   const mem=h=>{const a=[];for(let q=h;q;q=q.next)a.push(q);return a;},done=new Set();
   for(const A of heads){if(done.has(A))continue;const ma=mem(A),t0=ma[0].time,t1=ma[ma.length-1].time;
    const B=heads.find(H=>H!==A&&!done.has(H)&&H.xh!==A.xh&&H.time>t0&&H.time<t1);if(!B)continue;
@@ -80,7 +80,7 @@ const e0=ev.find(e=>e.tok),LEAD=Math.max(3,meta.LEAD,e0?FALL_K/(()=>{let v=meta.
   // 체인이 여러 동시치기에 걸치면 모두 한 덩어리(union)로 묶어 같은 속도를 공유 — 덮어쓰기로 어긋나는 것 방지
   const par=new Map(),fd=n=>{while(par.get(n)!==n){par.set(n,par.get(par.get(n)));n=par.get(n);}return n;},un=(a,b)=>{a=fd(a);b=fd(b);if(a!==b)par.set(a,b);};
   for(const n of notes)par.set(n,n);let any=false;
-  for(const g of by.values()){if(g.length<2)continue;const ty=g[0].type;if(g.some(n=>n.type!==ty))continue; // 빨강만·초록만(섞인 건 예외)
+  for(const g of by.values()){if(g.length<2)continue;const ty=g[0].type;if(g.some(n=>n.type!==ty))continue;if(ty==='R')continue; /* 사용자 최종 규칙: 빨강 동시치기는 평행·방향 공유 없이 각자 일반 노트처럼(초록만 평행 유지) */ // 빨강만·초록만(섞인 건 예외)
    any=true;for(const n of g){for(const q of chainOf(n))un(q,g[0]);n.chordPar=1;}}
   if(any){const comp=new Map();for(const n of notes){if(!n.chordPar)continue;const r=fd(n);if(!comp.has(r))comp.set(r,new Set());}
    for(const n of notes){const r=fd(n);if(comp.has(r))comp.get(r).add(n);}
