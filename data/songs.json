@@ -321,5 +321,20 @@
    "beat": 232,
    "len": 32
   }
+ },
+ {
+  "id": "ETA",
+  "title": "Eta Beta Eta",
+  "artist": "LUZE",
+  "bpm": "186",
+  "folder": "ORIGINAL",
+  "audio": "data/music/ETA.mp3",
+  "audioOffset": -0.777,
+  "levels": {
+   "SPECIAL": 12
+  },
+  "charts": {
+   "SPECIAL": "charts/ETA-SPECIAL.dgb"
+  }
  }
 ]

@@ -2,7 +2,7 @@
 // ============ 곡 목록 / 옵션 ============
 let SONGS=[]; // data/songs.json 에서 채움(정적 데이터 계층)
 const CHARTS={};window.MIDI_SONGS=window.MIDI_SONGS||{};
-function songLevels(s){if(s.art||s.mid)return [10,10,10,10];return DIFFS.map(d=>d===s.diffName?s.level:null);}
+function songLevels(s){if(s.levels)return DIFFS.map(d=>s.levels[d]??null);if(s.art||s.mid)return [10,10,10,10];return DIFFS.map(d=>d===s.diffName?s.level:null);}
 const FOLDERS=[['ALL','전체'],['USER','불러온 곡']];
 const SIZES=[56,44,34]; // 오브젝트 크기(시각만, 판정 영역 불변 — limelight~ '오브젝트 사이즈' 커스터마이즈 [namu 라임라이트/그루빈]). 34≈원작 실측 9%W
 const ND_STEPS=[34,39.5,45,50.5,56]; // 노트 지름 5단계(논리 px). 최대 56 = 기존 기본값
@@ -63,6 +63,7 @@ const loading=new Map();
 function loadSong(s,d){if(s.text)return Promise.resolve();const key=s.id+'-'+DIFFS[d];
  if(!loading.has(key)){const jobs=[fetch(s.charts[DIFFS[d]]).then(r=>{if(!r.ok)throw new Error(r.status);return r.text();}).then(t=>{CHARTS[key]=t;})];
   if(s.music&&!loading.has('m:'+s.id)){const mp=fetch(s.music).then(r=>r.json()).then(j=>{if(s.mid)MIDI_SONGS[s.mid]=j;else window.ARTM_ARR=j;});loading.set('m:'+s.id,mp);}
-  if(s.music)jobs.push(loading.get('m:'+s.id));loading.set(key,Promise.all(jobs).catch(e=>{loading.delete(key);loading.delete('m:'+s.id);throw e;}));}
+  if(s.music)jobs.push(loading.get('m:'+s.id));
+  if(s.audio)jobs.push(audLoad(s));loading.set(key,Promise.all(jobs).catch(e=>{loading.delete(key);loading.delete('m:'+s.id);throw e;}));}
  return loading.get(key);}
 

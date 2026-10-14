@@ -6,7 +6,7 @@ function start(noAudio){stopPreview();pvHold=true;if(!noAudio)initAudio();const 
  if(!playableDiff(s,opt.diff)){opt.diff=songLevels(s).findIndex(v=>v!=null);}
  if(!s.text&&!CHARTS[s.id+'-'+DIFFS[opt.diff]]){loadMsg='불러오는 중…';loadSong(s,opt.diff).then(()=>{loadMsg='';start(true);},e=>{loadMsg='불러오기 실패: '+e.message;});return;}
  start2();}
-function start2(){const s=curSong();if(!s)return;
+function start2(){bgmStop();const s=curSong();if(!s)return;
  if(!playableDiff(s,opt.diff)){opt.diff=songLevels(s).findIndex(v=>v!=null);}
  try{song=parseChart(chartTextFor(s,opt.diff));}catch(e){console.error(e);loadMsg='차트 오류: '+e.message;return;}
  if(!song.notes.length){loadMsg='노트가 없는 차트';return;}

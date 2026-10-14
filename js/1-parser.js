@@ -3,10 +3,11 @@
 const CH_TARGET={R1:{type:'R',k:0},R2:{type:'R',k:1},R3:{type:'R',k:2},R4:{type:'R',k:3},R5:{type:'R',k:4},R6:{type:'R',k:5},
  GL:{type:'G',side:'L'},GM:{type:'G',side:'M'},GR:{type:'G',side:'R'}};
 // 토큰: 1 통상 / 2·4 통상(v1 블랙, 별칭) / C·D 체인 / L 롱시작 / K 체인끝 롱 / E 롱끝 / F 플릭(빨강 전용)
-const TOK={'1':{},'2':{},'4':{},'C':{chain:1},'D':{chain:1},'L':{long:1},'K':{chain:1,long:1},'E':{end:1},'F':{flick:1}};
+const TOK={'1':{},'2':{},'4':{},'C':{chain:1},'D':{chain:1},'L':{long:1},'K':{chain:1,long:1},'E':{end:1},'F':{flick:1},'S':{straight:1}}; // S = 빨강 통상 + 수직 낙하(출발 x = 착지 x, 반사 없음). 트릴 구간 표시용(Eta Beta Eta). 초록에선 통상
 function parseChart(text){
  const meta={PATH:null,TITLE:'untitled',ARTIST:'',DIFF:'',LEVEL:'',BPM:120,LEAD:2,FALL:1.7,SEED:1},bpmDef={},spdDef={},ev=[],warn=[];let bbAlt=0;
  // 마디 길이(ML 채널, BMS 02 채널과 같음: 4/4 대비 배율. 5/4=1.25, 7/8=0.875, 15/16=0.9375)
+ const gLong=/^#GREENLONG\s+ON\s*$/im.test(text);
  const mlen={};text.split(/\r?\n/).forEach(raw=>{const q=raw.replace(/;.*$/,'').trim().match(/^#(\d{3}):ML:([\d.\/]+)$/i);if(q){const v=q[2].includes('/')?q[2].split('/').reduce((a,b)=>a/b):+q[2];mlen[+q[1]]=v;}});
  const mStart=[0];for(let i=1;i<=1000;i++)mStart[i]=mStart[i-1]+4*(mlen[i-1]||1);const mBeats=i=>4*(mlen[i]||1);
  text.split(/\r?\n/).forEach((raw,li)=>{const line=raw.replace(/;.*$/,'').trim();if(!line||line[0]!=='#')return;
@@ -20,7 +21,8 @@ function parseChart(text){
    for(let i=0;i<d.length;i++){let c=d[i].toUpperCase();if(c==='0')continue;if(!TOK[c]&&c!=='V'&&c!=='W'){warn.push(`${li+1}행: 알 수 없는 토큰 ${c}`);continue;}
     let cch=ch;if(legacyBB){cch=(bbAlt++%2)?'R4':'R3';c='1';}
     if(c==='V'||c==='W'){warn.push(`${li+1}행: 버티컬 오브젝트(${c})는 폐지 — 통상으로 변환`);c='1';}
-    if(cch[0]==='G'&&(c==='L'||c==='K'||c==='E'||c==='V'||c==='W'||c==='F')){ // 초록 = 통상만
+    if(cch[0]==='G'&&gLong&&(c==='L'||c==='E')){} // #GREENLONG ON: 초록 롱 허용(차트별 옵션, 원본 롱 재현용)
+    else if(cch[0]==='G'&&(c==='L'||c==='K'||c==='E'||c==='V'||c==='W'||c==='F')){ // 초록 = 통상만
      if(c==='E')continue;warn.push(`${li+1}행: 초록(${cch})에 특수 토큰 ${c} — 통상으로 변환`);c=c==='K'?'C':'1';}
     ev.push({beat:mStart[mea]+mBeats(mea)*i/d.length,ch:cch,tok:c,li});}return;}
   m=line.match(/^#(BPM|SPD)([0-9A-Z]{2})\s+([\d.]+)$/i);if(m){(m[1].toUpperCase()==='BPM'?bpmDef:spdDef)[m[2].toUpperCase()]=+m[3];return;}
@@ -60,7 +62,8 @@ const e0=ev.find(e=>e.tok),LEAD=Math.max(3,meta.LEAD,e0?FALL_K/(()=>{let v=meta.
     else{k=[0,1,2,3,4,5].sort((x,y)=>Math.max(0,...occ[x].map(o=>o.b))-Math.max(0,...occ[y].map(o=>o.b)))[0];warn.push(`레인 부족 ${time.toFixed(2)}s`);}
     if(chainP&&k!==chainP.lane){u0=undefined;fall=FALL_K/bpmAt(e.beat)*spdAt(e.beat);}}
    occE={a,b};gg=Object.assign({},g,{k});}
-  const n=makeNote(time,gg,u0,fall,tk,Math.floor(e.beat/8));if(g.type==='R'){n.lane=gg.k;n.ch=e.ch;n.lw=occE.b-(e.endT||time);occE.n=n;occ[gg.k].push(occE);lastR={ch:e.ch,n};chLast[e.ch]={n};}
+  if(tk.straight&&g.type==='R')u0=null; // S: 수직 낙하
+  const n=makeNote(time,gg,u0,fall,tk,Math.floor(e.beat/8));if(tk.straight&&g.type==='R')n.straight=1;if(g.type==='R'){n.lane=gg.k;n.ch=e.ch;n.lw=occE.b-(e.endT||time);occE.n=n;occ[gg.k].push(occE);lastR={ch:e.ch,n};chLast[e.ch]={n};}
   if(tk.chain&&prev&&!prev.long&&!prev.flick&&(n.type!=='R'||n.lane===prev.lane))prev.next=n; // 레인이 갈리면 체인 끊음
   lastIn[e.ch]=n;if(tk.long)openLong[e.ch]=n;}
  // 트릴: 시간차로 교대하는 빨강 체인 2개 → 서로 교차하지 않는 경로(왼쪽 레인 체인은 왼쪽에서, 오른쪽은 오른쪽에서, 반사 없음)
@@ -114,6 +117,7 @@ const e0=ev.find(e=>e.tok),LEAD=Math.max(3,meta.LEAD,e0?FALL_K/(()=>{let v=meta.
    const raw=atob(M.b64),n=raw.length/7|0;let tick=0;for(let i=0;i<n;i++){const o=i*7,dt=raw.charCodeAt(o)|raw.charCodeAt(o+1)<<8,du=raw.charCodeAt(o+2)|raw.charCodeAt(o+3)<<8,c=raw.charCodeAt(o+6);tick+=dt;if(c===255)continue;
     const b=tick/M.ppq,t=beatToTime(b);music.push({t,b,m:[raw.charCodeAt(o+4),raw.charCodeAt(o+5),c,beatToTime(b+du/M.ppq)-t]});}}}
  else if(meta.MUSIC==='ARTM'&&window.ARTM_ARR){for(const e of ARTM_ARR){const b=e.b+4;music.push({t:beatToTime(b),b,a:e,spb:60/bpmAt(b)});}}
+ else if(meta.MUSIC==='AUDIO'){} // 녹음 음원: songs.json audio — 2-audio.js bgmTick가 재생
  else for(let h=0;h<lastBeat*2;h++){const b=h/2;music.push({t:beatToTime(b),b});}
  const mEnd=music.length?music[music.length-1].t+1.5:0;
  return {meta,notes,warn,endTime:Math.max(last+1.5,mEnd),music,beatToTime,bpmCh,spdCh};

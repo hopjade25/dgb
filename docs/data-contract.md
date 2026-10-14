@@ -32,3 +32,8 @@ GitHub Pages는 정적 호스팅이라 서버 코드는 없습니다. "백엔드
 4. `node tools/playcheck.js charts/<ID>-*.dgb`가 위반 0이어야 합니다.
 5. 새 파일을 서비스 워커가 바로 반영하게 하려면 `sw.js`의 `V`(캐시 버전)를 올립니다. 셸 파일은 네트워크 우선이라 새로고침하면 반영되고, 차트·음악 파일은 캐시 우선입니다.
 6. 사용자 차트는 앱의 파일 불러오기(곡 선택 화면)로 계속 열 수 있습니다(`#MUSIC` 없이 드럼 합성).
+
+## 녹음 음원 (v3.6)
+- songs.json 항목에 `"audio":"data/music/<ID>.mp3"`, `"audioOffset":초` — audioOffset = 차트 0박(#000 마디 시작) 시점의 음원 내 시각(음수면 0박보다 음원이 늦게 시작). MP3 192kbps 44.1kHz 스테레오. 차트는 `#MUSIC AUDIO`.
+- `"levels":{"SPECIAL":12}` 로 난이도별 레벨 표시(없으면 기존 규칙).
+- ETA(Eta Beta Eta): 원본 DJMAX RESPECT V 5B MX(ez2pattern.kr), 음원 SoundCloud(오프셋 −0.777s, 첫 화음 어택 기준).

@@ -61,3 +61,11 @@ function now(){if(paused)return paused.t;const pt=performance.now()/1000-perf0;
  if(audioRunning()){const at=ac.currentTime;if(at>lastAcT){lastAcT=at;lastAdv=pt;if(!audioOK){acOff=pt-(at-t0);audioOK=true;}}else if(pt-lastAdv>.25)audioOK=false;
   if(audioOK)return at-t0+acOff+AT;}else audioOK=false;return pt+AT;}
 
+// ===== 녹음 음원(songs.json "audio","audioOffset"): audioOffset = 차트 0박 시점의 음원 시각(초). 게임 시각 g의 음원 위치 = g − LEAD + audioOffset =====
+const AUD={};let bgm=null;
+function audLoad(s){if(!s.audio||AUD[s.id]||!ac)return Promise.resolve();return fetch(s.audio).then(r=>{if(!r.ok)throw new Error(r.status);return r.arrayBuffer();})
+ .then(b=>new Promise((ok,no)=>{const r=ac.decodeAudioData(b,ok,no);if(r&&r.then)r.then(ok,no);})).then(buf=>{AUD[s.id]=buf;});}
+function bgmStop(){if(!bgm)return;try{bgm.stop();}catch(_){}try{bgm.disconnect();}catch(_){}bgm=null;}
+function bgmTick(){const s=song&&song.src;if(scene!=='play'||paused||!s||!s.audio){bgmStop();return;}
+ if(bgm||!audioRunning())return;if(!AUD[s.id]){if(!s._al){s._al=1;audLoad(s).catch(e=>console.warn('audio',e)).finally(()=>{s._al=0;});}return;}const g=now(),pos=g-song.meta.LEAD+(s.audioOffset||0),buf=AUD[s.id];if(pos>=buf.duration)return;
+ const src=ac.createBufferSource();src.buffer=buf;src.connect(master);if(pos<0)src.start(ac.currentTime-pos,0);else src.start(ac.currentTime,pos);bgm=src;}

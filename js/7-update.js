@@ -1,6 +1,6 @@
 'use strict';
 // ============ 업데이트 ============
-function update(){previewTick();if(scene!=='play')return;if(paused){if(paused.cd&&performance.now()-paused.cd>=3000)unfreeze();return;}scheduleAudio();const t=now();
+function update(){previewTick();bgmTick();if(scene!=='play')return;if(paused){if(paused.cd&&performance.now()-paused.cd>=3000)unfreeze();return;}scheduleAudio();const t=now();
  {const pn=performance.now();for(const [pid,f] of [...pendF])if(pn-f.w>FLICK_MS)resolveFlick(pid,false);} // 튕기지 않고 누르고만 있으면 FLICK_MS 뒤 탭 판정
  for(const n of notes){
   if(n.state)continue;
