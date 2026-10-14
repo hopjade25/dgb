@@ -331,9 +331,11 @@
   "audio": "data/music/ETA.mp3",
   "audioOffset": -0.777,
   "levels": {
+   "HARD": 11,
    "SPECIAL": 12
   },
   "charts": {
+   "HARD": "charts/ETA-HARD.dgb",
    "SPECIAL": "charts/ETA-SPECIAL.dgb"
   }
  }
