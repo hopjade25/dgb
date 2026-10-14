@@ -85,7 +85,7 @@ function drawMenu(T){
   txt('기준판: REFLEC BEAT VOLZZA 2 시스템',W/2,600,'11px sans-serif','#667');txt(buildLabel(),W/2,620,'10px sans-serif','#556');return;}
  if(scene==='select'){
   box(0,8,W,40,'#14102a');txt('MUSIC SELECT',12,28,'bold 18px sans-serif','#7ff','left');
-  txt(`${HITS[opt.hit][0]}${opt.auto?' · AUTO':''}`,W-12,28,'11px sans-serif','#ccd','right');
+  txt(`${HITS[opt.hit][0]==='RbPlus'?'RbPlus '+RB_SETS[opt.rb]:HITS[opt.hit][0]}${opt.auto?' · AUTO':''}`,W-12,28,'11px sans-serif','#ccd','right');
   listTick();const L=folderSongs(),o=rs.findIndex(b=>b.list)+1;if(!L.length)txt('곡 없음 — 아래 [불러오기]',W/2,220,'13px sans-serif','#889');
   ctx.save();ctx.beginPath();ctx.rect(0,LIST_Y,W,LIST_H);ctx.clip();
   L.forEach((s,i)=>{const b={x:8,y:LIST_Y+i*CARD_P-listOff,w:344,h:CARD_H};if(b.y+b.h<LIST_Y||b.y>LIST_Y+LIST_H)return;const on=i===opt.sel,lv=songLevels(s); // 카드형 버튼

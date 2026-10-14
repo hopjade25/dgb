@@ -7,7 +7,7 @@ function initAudio(){if(paused&&scene==='play')return;try{
   const len=Math.floor(ac.sampleRate*.2),buf=ac.createBuffer(1,len,ac.sampleRate),d=buf.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1;noiseBuf=buf;
   const s=ac.createBufferSource();s.buffer=ac.createBuffer(1,1,22050);s.connect(ac.destination);s.start(0);}
  if(ac.state!=='running'){const r=ac.resume();if(r&&r.catch)r.catch(()=>{});}
- if(typeof HITS!=='undefined'&&HITS[opt.hit][0]==='MUSE')museLoad();}catch(e){console.warn('audio disabled',e);ac=null;}}
+ if(typeof HITS!=='undefined'&&HITS[opt.hit][0]==='MUSE')museLoad();if(typeof HITS!=='undefined'&&HITS[opt.hit][0]==='RbPlus')rbLoad();}catch(e){console.warn('audio disabled',e);ac=null;}}
 function audioRunning(){return ac&&ac.state==='running';}
 function osc(t,type,f0,f1,v,dur){const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(f0,t);if(f1)o.frequency.exponentialRampToValueAtTime(f1,t+dur*.4);
  g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g);g.connect(OUT());o.start(t);o.stop(t+dur+.02);}

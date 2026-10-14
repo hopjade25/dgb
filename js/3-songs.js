@@ -12,14 +12,24 @@ const HITS=[['클랩',t=>{nz(t,.5,.09,'bandpass',1400);nz(t+.012,.35,.07,'bandpa
  ['우드',t=>{osc(t,'sine',900,600,.45,.07);}],['림샷',t=>{osc(t,'triangle',520,0,.35,.05);nz(t,.35,.05,'highpass',3000);}],
  ['판정별',(t,k)=>{const f={just:1760,great:1320,good:880}[k||'just'];osc(t,'sine',f,0,.25,.06);osc(t,'triangle',f/2,0,.12,.05);}], // REFLET MUSE의 판정별 효과음(just/great/good) 개념 — 소리는 자체 합성
  ['끄기',null],
- ['MUSE',(t,k)=>museHit(t,k)]]; // REFLET MUSE 0.10.3 판정음(just/great/good.wav, 사용자 결정으로 사용 — docs/assets-credits.md)
+ ['MUSE',(t,k)=>museHit(t,k)],
+ ['RbPlus',(t,k)=>rbHit(t,k)]]; // REFLET MUSE 0.10.3 판정음(just/great/good.wav, 사용자 결정으로 사용 — docs/assets-credits.md)
 // MUSE 판정음: 선택 시(또는 저장된 선택으로 오디오 시작 시) 지연 로딩 → WebAudio 버퍼로 디코드(저지연)
 const MUSE={};let museP=null;
 function museLoad(){if(museP||!ac)return museP;museP=Promise.all(['just','great','good'].map(k=>fetch('data/sfx/muse-'+k+'.wav').then(r=>r.arrayBuffer())
  .then(b=>new Promise((ok,no)=>{const r=ac.decodeAudioData(b,ok,no);if(r&&r.then)r.then(ok,no);})).then(buf=>{MUSE[k]=buf;}))).catch(e=>{console.warn('MUSE sfx',e);museP=null;});return museP;}
 function museHit(t,k){const buf=MUSE[k||'just']||MUSE.just;if(!buf){museLoad();return;}const s=ac.createBufferSource();s.buffer=buf;s.connect(hitG||master);s.start(t);}
+// RbPlus(REFLEC BEAT plus) 터치음 33세트 전부(IPA Sounds/00_Share/SHOT, just/great/good) — 옵션에서 ◀ ▶로 세트 선택, 선택 세트만 지연 로딩
+const RB_SETS=['DEFAULT1','DEFAULT2','DEFAULT3','CLAP','HIT','LIGHT','STEEL','SOTA','QRISPY','96','ELECTRO1','ELECTRO2','ELECTRO3','ELECTRO4','ELECTRO5','ELECTRO6','PERCUSSION','PERCUSSION2','TAMBOURINE','LATIN','JAPAN','JAPAN2','PAWAPURO','FIGHT','SWORD','BOMB','FIREWORKS','JINGLEBELL','BASEBALL','HOCKEY','TENNIS','TABLETENNIS','VOLLEYBALL'];
+if(opt.rb==null)opt.rb=0;
+const RBB={};const rbP={};
+function rbLoad(i){if(i==null)i=opt.rb;if(!ac)return null;if(rbP[i])return rbP[i];const n=RB_SETS[i].toLowerCase();RBB[i]=RBB[i]||{};
+ rbP[i]=Promise.all(['just','great','good'].map(k=>fetch('data/sfx/rb/'+n+'_'+k+'.wav').then(r=>r.arrayBuffer())
+ .then(b=>new Promise((ok,no)=>{const r=ac.decodeAudioData(b,ok,no);if(r&&r.then)r.then(ok,no);})).then(buf=>{RBB[i][k]=buf;}))).catch(e=>{console.warn('RB sfx',e);rbP[i]=null;});return rbP[i];}
+function rbHit(t,k){const B=RBB[opt.rb]||{},buf=B[k||'just']||B.just;if(!buf){rbLoad();return;}const s=ac.createBufferSource();s.buffer=buf;s.connect(hitG||master);s.start(t);}
+try{const rv=+localStorage.getItem('dgb.rb');if(localStorage.getItem('dgb.rb')!=null&&rv>=0&&rv<RB_SETS.length)opt.rb=rv;}catch(_){}
 try{const v=+localStorage.getItem('dgb.hit');if(v>=0&&v<HITS.length)opt.hit=v;const h=localStorage.getItem('dgb.hv');if(h!=null&&+h>=0&&+h<=1)opt.hv=+h;const r=localStorage.getItem('dgb.nd');if(r!=null&&ND_STEPS.includes(+r))opt.nd=+r;}catch(_){}
-function saveOpt(){try{localStorage.setItem('dgb.hit',opt.hit);localStorage.setItem('dgb.hv',opt.hv);localStorage.setItem('dgb.nd',opt.nd);}catch(_){}}
+function saveOpt(){try{localStorage.setItem('dgb.hit',opt.hit);localStorage.setItem('dgb.hv',opt.hv);localStorage.setItem('dgb.nd',opt.nd);localStorage.setItem('dgb.rb',opt.rb);}catch(_){}}
 function setHitVol(v){opt.hv=Math.max(0,Math.min(1,Math.round(v*20)/20));if(hitG)hitG.gain.value=.7*opt.hv;}
 function hitSound(k){const f=HITS[opt.hit][1];if(!f||!audioRunning())return;bus=hitG;try{f(ac.currentTime,k);}catch(e){}bus=null;}
 // ===== 곡 미리듣기: 선택 후 0.4초 → songs.json preview{beat,len}(차트 박 기준) 구간을 페이드 인/아웃으로 반복. 화면 이탈·시작 시 정지 =====

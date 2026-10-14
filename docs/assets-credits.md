@@ -24,3 +24,6 @@
 
 ## Note sprites
 - `data/img/notes/{red,gold,green}.png`: cropped from REFLEC BEAT plus offline pack texture `gm_parts1@2x.png` (rbhot2 offline_pack.zip).
+
+## Touch sounds (RbPlus)
+- `data/sfx/rb/<set>_{just,great,good}.wav`: all 33 REFLEC BEAT plus SHOT sets (IPA `Sounds/00_Share/SHOT/SD_SHOT_<SET>_*.m4a`), converted to mono 44.1kHz WAV with leading silence trimmed. Selectable in OPTION → 타격음 → RbPlus ◀ ▶.

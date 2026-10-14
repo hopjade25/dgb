@@ -27,15 +27,16 @@ function rects(){const r=[];
   r.push({x:8,y:560,w:344,h:44,act:()=>{go('title',-1);}});}
  if(scene==='option'){
   r.push({head:'타격음',sub:'탭하면 미리듣기 · 성공 판정마다 재생',y:62});
-  const setHit=i=>{opt.hit=i;saveOpt();initAudio();const p=HITS[i][0]==='MUSE'?museLoad():null;if(p)p.then(()=>hitSound('just'));else hitSound('just');};
+  const setHit=i=>{opt.hit=i;saveOpt();initAudio();const p=HITS[i][0]==='MUSE'?museLoad():HITS[i][0]==='RbPlus'?rbLoad():null;if(p)p.then(()=>hitSound('just'));else hitSound('just');};
   segRow(r,78,HITS.slice(0,4).map(h=>h[0]),opt.hit,setHit);
   segRow(r,130,HITS.slice(4).map(h=>h[0]),opt.hit-4,i=>setHit(i+4),20,320);
-  r.push({head:'타격음 볼륨',sub:'',y:196});
-  let lastP=0;slider(r,206,opt.hv,v=>{setHitVol(v);initAudio();const t=performance.now();if(t-lastP>140){lastP=t;hitSound('just');}},v=>Math.round(v*100)+'%',()=>{saveOpt();hitSound('just');});
-  r.push({head:'노트 크기',sub:'',y:272});
-  {const i=ND_STEPS.indexOf(opt.nd),n=ND_STEPS.length-1;slider(r,288,(i<0?n:i)/n,v=>{opt.nd=ND_STEPS[Math.round(v*n)];},()=>(ND_STEPS.indexOf(opt.nd)+1)+' / 5 단계',()=>saveOpt(),208);r[r.length-1].slider.steps=n;r.push({sample:1,y:288});} // 오른쪽 = 실제 크기 샘플 노트(빨강·초록)
-  r.push({head:'자동 플레이',sub:'',y:354});
-  segRow(r,364,['OFF','ON'],opt.auto?1:0,i=>{opt.auto=!!i;});
+  {const RI=HITS.findIndex(h=>h[0]==='RbPlus'),N=RB_SETS.length,pick=d=>{opt.rb=(opt.rb+d+N)%N;setHit(RI);};segRow(r,182,['◀',(opt.rb+1)+'/'+N+' '+RB_SETS[opt.rb],'▶'],opt.hit===RI?1:-1,i=>pick(i-1),20,320);} // RbPlus 터치음 세트 선택(33종)
+  r.push({head:'타격음 볼륨',sub:'',y:248});
+  let lastP=0;slider(r,258,opt.hv,v=>{setHitVol(v);initAudio();const t=performance.now();if(t-lastP>140){lastP=t;hitSound('just');}},v=>Math.round(v*100)+'%',()=>{saveOpt();hitSound('just');});
+  r.push({head:'노트 크기',sub:'',y:324});
+  {const i=ND_STEPS.indexOf(opt.nd),n=ND_STEPS.length-1;slider(r,340,(i<0?n:i)/n,v=>{opt.nd=ND_STEPS[Math.round(v*n)];},()=>(ND_STEPS.indexOf(opt.nd)+1)+' / 5 단계',()=>saveOpt(),208);r[r.length-1].slider.steps=n;r.push({sample:1,y:340});} // 오른쪽 = 실제 크기 샘플 노트(빨강·초록)
+  r.push({head:'자동 플레이',sub:'',y:406});
+  segRow(r,416,['OFF','ON'],opt.auto?1:0,i=>{opt.auto=!!i;});
   r.push({x:20,y:556,w:320,h:52,act:()=>{go('select',-1);},main:1});}
  if(scene==='result')r.push({x:30,y:560,w:300,h:52,act:()=>{go('select');},main:1});
  return r;}
