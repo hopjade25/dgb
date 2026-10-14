@@ -5,7 +5,7 @@ function box(x,y,w,h,fill,stroke,lw){ctx.fillStyle=fill;ctx.fillRect(x,y,w,h);if
 function chevron(x,y,s,up){ctx.beginPath();ctx.moveTo(x-s,y+(up?s*.5:-s*.5));ctx.lineTo(x,y+(up?-s*.5:s*.5));ctx.lineTo(x+s,y+(up?s*.5:-s*.5));ctx.stroke();}
 // 노트 스프라이트: 사용자가 보낸 REFLEC BEAT 스크린샷에서 잘라낸 이미지(data/img/notes, docs/assets-credits.md)
 const NOTE_IMG={};for(const k of ['red','gold','green']){const im=new Image();im.decoding='async';im.src='data/img/notes/'+k+'.png';NOTE_IMG[k]=im;}
-const GREEN_ARROW0=102*Math.PI/180; // green.png 안의 화살표가 가리키는 각도(이미지 좌표, 실측)
+const GREEN_ARROW0=90*Math.PI/180; // RbPlus gm_parts1 녹색 노트: 역삼각형(아래, 90°)
 function drawNoteBody(n,x,y,alpha){ctx.globalAlpha=alpha;const r=n.r,im=NOTE_IMG[n.type==='G'?'green':((n.gold||n.flick)?'gold':'red')];
  if(im&&im.complete&&im.naturalWidth){const sz=r*2;
   if(n.type==='G'){ // 화살표는 항상 자기 버튼 쪽(지나친 뒤엔 마지막 방향 유지 = 진행 방향)

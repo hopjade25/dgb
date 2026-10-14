@@ -21,3 +21,6 @@
 - Starter Package 약관(…/StarterPackage/index.html): 수록 곡·차트는 REFLET MUSE 안에서만 사용할 수 있고 재배포는 금지입니다(제작자가 허가한 경우만 예외, 현재 0곡).
 - (초기 판단) dgb는 GitHub Pages에 공개 배포됩니다. 이미지(노트 스프라이트 등)는 명시적으로 허가 없이 사용할 수 없고, 효과음 wav·bgm을 저장소에 올리는 것은 재배포에 해당합니다. 그래서 **에셋은 하나도 넣지 않았습니다.** 대신 개념만 빌렸습니다(판정별 효과음 → 옵션 「판정별」, 소리는 자체 합성).
 - 사용하려면 작자(reflet@gdlife.sakura.ne.jp, 사이트 Q&A 기재)의 허가가 필요합니다. 허가를 받으면 sound/*.wav → ogg로 변환해 `assets/`에 넣고, 이 문서에 허가 내용을 기록하면 됩니다.
+
+## Note sprites
+- `data/img/notes/{red,gold,green}.png`: cropped from REFLEC BEAT plus offline pack texture `gm_parts1@2x.png` (rbhot2 offline_pack.zip).
